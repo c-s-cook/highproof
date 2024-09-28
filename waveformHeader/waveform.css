@@ -1,9 +1,10 @@
 
 #waveformHeader {
     box-sizing: border-box;
-    border: 1px red dashed;
+    /* border: 1px red dashed; */
     
     position: fixed;
+    z-index: -10;
 
 
     
@@ -33,13 +34,15 @@
     left: 0;
     justify-content: flex-end;
     padding-right: 2.5px;
+    /* background-color: rgba(0, 255, 255, 0.258); */
 }
 
 .waveformSplit:last-of-type {
     justify-content: flex-start;
     top: 0;
     right: 0;
-    padding-left: 2.5px
+    padding-left: 2.5px;
+    /* background-color: pink; */
 }
 
 .wavebar {
