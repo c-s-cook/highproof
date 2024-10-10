@@ -4,6 +4,11 @@ const waveform = document.createElement("div");
 waveform.id = "waveformHeader";
 document.body.appendChild(waveform);
 
+// create & append white gradient bg
+const waveformGradientBG = document.createElement("div");
+waveformGradientBG.id = "waveformGradientBG";
+document.body.appendChild(waveformGradientBG);
+
 
 // create the Left and Right split boxes
 const waveformLeft = document.createElement("div");
@@ -22,11 +27,31 @@ wavebar.classList.add("wavebar");
 
 let width = window.innerWidth;
 
-let wavebarGap = 50;
-let wavebarWidth = 5;
-wavebar.style.width = `${wavebarWidth}px`;
+let wavebarGap;
+let wavebarWidth;
 
-let bars = (width/2)/(wavebarGap + wavebarWidth);
+let setWaveBars = () => {
+    console.log("width: ", width);
+    if (width < 360){
+        wavebarGap = 2;
+        wavebarWidth = 2;
+        changeWaveBars();
+    } else if (640 >= width && width >= 360) {
+        wavebarGap = 3;
+        wavebarWidth = 4;
+        changeWaveBars();
+    } else if (1280 >= width && width > 640) {
+        wavebarGap = 10;
+        wavebarWidth = 10;
+        changeWaveBars();
+    } else if (width > 1280) {
+        wavebarGap = 15;
+        wavebarWidth = 10;
+        changeWaveBars();
+    }   
+};
+
+let bars;
 
 let changeWaveBars = () => {
     bars = (width/2)/(wavebarGap + wavebarWidth);
@@ -47,29 +72,13 @@ let changeWaveBars = () => {
 }
 
 
-let setWaveBars = () => {
-    console.log("width: ", width);
-    if (width < 360){
-        wavebarGap = 2;
-        wavebarWidth = 2;
-        changeWaveBars();
-    } else if (640 >= width && width >= 360) {
-        wavebarGap = 3;
-        wavebarWidth = 4;
-        changeWaveBars();
-    } else if (1280 >= width && width > 640) {
-        wavebarGap = 4;
-        wavebarWidth = 7;
-        changeWaveBars();
-    } else if (width > 1280) {
-        wavebarGap = 6;
-        wavebarWidth = 10;
-        changeWaveBars();
-    }   
-};
 setWaveBars();
 changeWaveBars();
 
+
+wavebar.style.width = `${wavebarWidth}px`;
+
+// bars = (width/2)/(wavebarGap + wavebarWidth);
 
 
 
@@ -85,7 +94,7 @@ window.addEventListener("resize", () => {
 // wave frequency
 //      - increasing gives more waves
 //      - f = 1 just tapers down to edges, not back up
-let f = 2.5;
+let f = 3.5;
 
 //  initial interval delay
 let i = 80;
@@ -97,7 +106,7 @@ let minHeight = 30;
 
 let x = 0;
 let waveHeight = () => {
-    let t = Math.abs(Math.sin(Math.trunc((Math.abs(bars - x*f) / bars)*100)/100));
+    let t = Math.abs(Math.cos(Math.trunc((Math.abs(bars - x*f) / bars)*100)/100));
 
     // console.log("t^2: ", t*t);
     return t*t;

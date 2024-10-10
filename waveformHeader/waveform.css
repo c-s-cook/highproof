@@ -12,9 +12,21 @@
     top: 0vw;
     left: 0vw;
     width: 100vw;
-    height: 15vh;
+    height: 5vh;
     transform: translateY(-20%);
 }
+
+#waveformGradientBG {
+    position: fixed;
+    z-index: -15;
+    top: 0;
+    left: 0;
+    height: 20vh;
+    width: 100vw;
+    background: linear-gradient(180deg, rgb(255, 255, 255), rgba(255, 255, 255, 0.24) 50%, rgba(255, 255, 255, 0));
+    
+}
+
 
 .waveformSplit {
     
