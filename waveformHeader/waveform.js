@@ -1,14 +1,3 @@
-//  new comment for rebase test
-
-// append css file
-let head = document.getElementsByTagName('head')[0];
-let css = document.createElement('link');
-css.rel = 'stylesheet';
-css.type = 'text/css';
-css.href = './waveform.css';
-head.appendChild(css);
-
-
 // create & append the main container
 const waveform = document.createElement("div");
 waveform.id = "waveformHeader";
