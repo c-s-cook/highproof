@@ -6,7 +6,7 @@ on:
     - itza-live
 
 jobs:
-  deploy:
+  Update-scripts:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
