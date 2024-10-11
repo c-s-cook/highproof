@@ -1,3 +1,5 @@
+//  new comment for rebase test
+
 // append css file
 let head = document.getElementsByTagName('head')[0];
 let css = document.createElement('link');
