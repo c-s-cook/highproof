@@ -1,29 +1,30 @@
-
 #waveformHeader {
     box-sizing: border-box;
     
-    position: fixed;
-    z-index: -10;
+    position: absolute;
+    z-index: 99;
+    overflow: hidden;
 
     top: 0vw;
     left: 0vw;
     width: 100vw;
-    height: 10vh;
-    transform: translateY(-15%);
+    height: 80px;
+    transform: translateY(-20%);
 }
 
 #waveformGradientBG {
-    position: fixed;
-    z-index: -15;
+    position: absolute;
+    z-index: 95;
+    overflow: hidden;
     top: 0;
     left: 0;
-    height: 25vh;
+    height: 120px;
     width: 100vw;
     background: linear-gradient(
         180deg, 
         rgb(255, 255, 255),
-        rgba(255, 255, 255, 0.74) 50%,
-        rgba(255, 255, 255, 0.185) 75%, 
+        /* rgba(255, 255, 255, 0.74) 50%, */
+        /* rgba(255, 255, 255, 0.185) 75%,  */
         rgba(255, 255, 255, 0)
     );
 }
@@ -63,12 +64,26 @@
     position: relative;
     /* display: inline-block; */
     background-color: #f05624;
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 0 6px 6px;
     height: 100%;
-    /* max-width: 20px; */
-    min-width: 8px;
+/*     max-width: 20px; */
+    min-width: 10px;
     animation: wavebarIn 0.5s ease-out;
 }
+
+@media only screen and (max-width: 999px)  {
+    #waveformHeader {
+        height: 50px;
+    }
+	#waveformGradientBG {
+		height: 100px;
+	}
+	
+	header#top {
+		margin-top: 20px; /* CSC added this for waveform design */
+	}
+}
+	
 
 
 
