@@ -3,29 +3,64 @@ let fileInput = document.getElementById('fileInput');
 if(fileInput) console.log("found fileInput!");
 
 
-// async function tours() {
-//     console.log("inside tours()");
-//     let data;
-//     try {
-//         const tours = await fetch('../api/query-table');
+let vouchers = [];
+let tourTitles = [];
+let availableVouchers = [];
+let newTourTitles = [];
+let existingTourTitles = [];
 
-//         data = await tours.json();
-//         console.log("fetched data...", data)
 
-//     } catch (error) {
-//         console.log(error);
-//     }
 
-//     return data;
-// }
+const handleNewTourTrue = (e) => {
+    
+    let i = e.target.dataset.tourIndex;
+    console.log("Clicked, and found this array index: ",i)
+    console.log("Tour Title in question is -> ", newTourTitles[i].TITLE)
+}
+
+
+const handleNewTourFalse = (e) => {
+    
+    let i = e.target.dataset.tourIndex;
+    console.log("Clicked, and found this array index: ",i)
+    console.log("Tour Title in question is -> ", newTourTitles[i].TITLE)
+}
+
+
+const handleExistingTourTrue = (e) => {
+    
+    let i = e.target.dataset.tourIndex;
+    console.log("Clicked, and found this array index: ",i)
+    console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+}
+
+
+const handleExistingTourChange = (e) => {
+    
+    let i = e.target.dataset.tourIndex;
+    console.log("Clicked, and found this array index: ",i)
+    console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+}
+
+
+const handleExistingTourFalse = (e) => {
+    
+    let i = e.target.dataset.tourIndex;
+    console.log("Clicked, and found this array index: ",i)
+    console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+}
+
+
+
+
 
 
 fileInput.addEventListener('change', async function(event) {
     const file = event.target.files[0];
     
-    var vouchers = [];
-    var tourTitles = [];
-    var availableVouchers = [];
+    // var vouchers = [];
+    // var tourTitles = [];
+    // var availableVouchers = [];
 
     if (file) {
         const reader = new FileReader();
@@ -102,8 +137,8 @@ fileInput.addEventListener('change', async function(event) {
 
     console.log("and now to compare...", tourTitles.length);
 
-    let newTourTitles = [];
-    let existingTourTitles = [];
+    // let newTourTitles = [];
+    // let existingTourTitles = [];
 
     for (var nt = 0; nt < tourTitles.length; nt++){
         let titleExists = false;
@@ -139,8 +174,8 @@ fileInput.addEventListener('change', async function(event) {
             <div>
                 <p>
                     ${newTourTitles[nt].TITLE} | ${newTourTitles[nt].COUNT}
-                    <button id="new-tour-true-${nt}">Yes, it's a new tour</button>
-                    <button id="new-tour-false-${nt}">No, not a new tour</button>
+                    <button class="new-tour-true" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
+                    <button class="new-tour-false" data-tour-index="${nt}" onclick="handleNewTourFalse(event)">No, not a new tour</button>
                 </p>
             </div>
             `
@@ -157,9 +192,9 @@ fileInput.addEventListener('change', async function(event) {
                 <div>
                     <p>
                         ${existingTourTitles[et].TourTitle.TITLE} | ${existingTourTitles[et].TourTitle.COUNT}
-                        <button id="existing-tour-true-${et}">Yes, this is the right tour</button>
-                        <button id="existing-tour-change-${et}">Yes, BUT this is a different tour</button>
-                        <button id="existing-tour-false-${et}">No, this is a new tour</button>
+                        <button class="existing-tour-true" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
+                        <button class="existing-tour-change" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
+                        <button class="existing-tour-false" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, this is a new tour</button>
                     </p>
                 `;
 
@@ -186,8 +221,6 @@ fileInput.addEventListener('change', async function(event) {
         }
     }
     
-
-
 });
 
 
