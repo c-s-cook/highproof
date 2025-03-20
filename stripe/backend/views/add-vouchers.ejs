@@ -7,21 +7,44 @@
       <button>Select CSV File</button>
 
       <input type="file" id="fileInput" accept=".csv" />
+
       <pre id="output"></pre>
 
 
       <div id="results" style="display: none;">
         <h2>RESULTS</h2>
-        <div id="existing-tours">
+        <div>
           <h3>EXISTING TOURS</h3>
           <p>Found vouchers for the following, exisiting tour(s):</p>
+          <div id="existing-tours"></div>
         </div>
-        <div id="new-tours">
+        <div >
           <h3>NEW TOURS:</h3>
           <p>These are the new tours that aren't connected to any existing tour(s):</p>
+          <div id="new-tours"></div>
         </div>
       </div>
-  
+
+      <div id="pop-up-bg" class="pop-up" style="display: none;"></div>
+      
+      <div id="pop-up" class="pop-up" style="display: none;">
+        <p id="close-pop-up">&#9747</p>
+        <div id="pop-up-content">
+
+
+          <div id="new-tour-false" style="display: none;">
+            <p>Is the text below a <i>new title</i> for an an existing tour?</p>
+            <p id="ntf-title"></p>
+            <p>If so, what tour / old title is it replacing?</p>
+            <div id="ntf-existing-tours-list"></div>
+          </div>
+
+        </div>
+        
+        
+      </div>
+      
+      <link rel='stylesheet' href='/stylesheets/add-vouchers.css' />
       <script defer src="../javascripts/add-vouchers.mjs"></script>
 
 

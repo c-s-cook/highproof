@@ -7,11 +7,36 @@ let vouchers = [];
 let tourTitles = [];
 let availableVouchers = [];
 let newTourTitles = [];
+let toursInDB;
 let existingTourTitles = [];
 
 
 
+
+function togglePopUp() {
+
+    let popUps = document.getElementsByClassName('pop-up');
+
+    for (let e = 0; e < popUps.length; e++) {
+        if (popUps[e].style.display == "none") {
+            popUps[e].style.display = "block";
+        } else {
+            popUps[e].style.display = "none";
+        }
+    }
+}
+
+
+document.getElementById('close-pop-up').addEventListener("click", togglePopUp);
+// let closePopUp = document.getElementById('close-pop-up');
+// closePopUp.addEventListener("click", ()=>{
+//     togglePopUp();
+// });
+
+
+
 const handleNewTourTrue = (e) => {
+    togglePopUp();
     
     let i = e.target.dataset.tourIndex;
     console.log("Clicked, and found this array index: ",i)
@@ -19,23 +44,101 @@ const handleNewTourTrue = (e) => {
 }
 
 
+
+
+const handleCorrectedTourSelected = (e, tourDBNum, i, dbIndex) => {
+
+    console.log("Picked a tour. It was tour: ", tourDBNum);
+    console.log(existingTourTitles)
+    console.log(newTourTitles)
+    let allTitles = toursInDB[dbIndex].TITLES
+    allTitles.push(newTourTitles[i].TITLE)
+
+    existingTourTitles.push({
+        "TourTitle": {
+            "TITLE": newTourTitles[i].TITLE,
+            "COUNT": newTourTitles[i].COUNT
+        },
+        "allTitles": allTitles,
+        "tourNumber": tourDBNum, 
+        "dbIndex": dbIndex
+    });
+    newTourTitles.splice(i, 1);
+
+    console.log("after push and splice...")
+    console.log(existingTourTitles)
+    console.log(newTourTitles)
+
+    togglePopUp();
+    document.getElementById('new-tour-false').style.display = "none";
+    displayTourTitleResults();
+    
+}
+
 const handleNewTourFalse = (e) => {
+    togglePopUp();
+
+    
+
+    console.log("upon entering handleNewTourFalse()...")
+    console.log(existingTourTitles)
+    console.log(newTourTitles)
     
     let i = e.target.dataset.tourIndex;
     console.log("Clicked, and found this array index: ",i)
     console.log("Tour Title in question is -> ", newTourTitles[i].TITLE)
+
+    
+    let menu = document.getElementById('new-tour-false');
+    menu.style.display = "block";
+
+    
+    let menuTitle = document.getElementById('ntf-title');
+    menuTitle.innerText = `"${newTourTitles[i].TITLE}"`
+
+
+
+    let menuTourList = document.getElementById('ntf-existing-tours-list');
+    toursInDB.map((tour, dbIndex) => {
+        
+        let listTheTitles = () => {
+            let titleList = ``;
+            for(let t = tour.TITLES.length; t > 0; t--){
+                let isMainTitle = (t == tour.TITLES.length) ? `style="font-weight: bold"` : ``;
+                titleList += `<p ${isMainTitle}>${tour.TITLES[t-1]}</p>`
+            }
+            
+            return titleList
+        }
+        menuTourList.innerHTML += `
+        <div class="menu-tours-list" onclick="handleCorrectedTourSelected(event, ${tour.TOUR}, ${i}, ${dbIndex})">
+            <p>${tour.TOUR}</p>
+            <div>
+                ${listTheTitles()}
+            </div>
+        `;
+    })
+
+
+
 }
 
 
 const handleExistingTourTrue = (e) => {
     
+    
     let i = e.target.dataset.tourIndex;
     console.log("Clicked, and found this array index: ",i)
     console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+
+    console.log(document.querySelector(`.existing-tour.checked, [data-tour-index="${i}]`));
+    document.querySelector(`.existing-tour.checked, [data-tour-index="${i}]`).style.visibility = "visible";
+
 }
 
 
 const handleExistingTourChange = (e) => {
+    togglePopUp();
     
     let i = e.target.dataset.tourIndex;
     console.log("Clicked, and found this array index: ",i)
@@ -44,11 +147,85 @@ const handleExistingTourChange = (e) => {
 
 
 const handleExistingTourFalse = (e) => {
+    togglePopUp();
     
     let i = e.target.dataset.tourIndex;
     console.log("Clicked, and found this array index: ",i)
     console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
 }
+
+
+
+
+
+
+function displayTourTitleResults() {
+    //  DISPLAY RESULTS AND GET CONFIRMATION
+    document.getElementById('results').style.display = "inline-block";
+
+    // insert new Tours
+    if (newTourTitles.length < 1) {
+        document.getElementById('new-tours').innerText = `No New Tours`;
+    } else {
+        document.getElementById('new-tours').innerHTML = '';
+        for (var nt = 0; nt < newTourTitles.length; nt++) {
+            document.getElementById('new-tours').innerHTML += `
+                <div>
+                    <p>
+                        <span class="new-tour checked ${nt}" style="visibility:hidden">&#9989</span>
+                        ${newTourTitles[nt].TITLE} | ${newTourTitles[nt].COUNT}
+                        <button class="new-tour true" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
+                        <button class="new-tour false" data-tour-index="${nt}" onclick="handleNewTourFalse(event)">No, not a new tour</button>
+                    </p>
+                </div>
+                `
+        }
+    }
+
+
+    //  insert existing tours that have new vouchers in the uploaded csv...
+    if (existingTourTitles.length < 1) {
+        document.getElementById('existing-tours').innerHTML = 'No Existing Tours';
+    } else {
+        document.getElementById('existing-tours').innerHTML = '';
+
+        for (var et = 0; et < existingTourTitles.length; et++) {
+            document.getElementById('existing-tours').innerHTML += `
+                    <div>
+                        <p>
+                            <span class="existing-tour checked ${et}" style="visibility:hidden">&#9989</span>
+                            ${existingTourTitles[et].TourTitle.TITLE} | ${existingTourTitles[et].TourTitle.COUNT}
+                            <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
+                            <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
+                            <button class="existing-tour false ${et}" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, this is a new tour</button>
+                        </p>
+                    `;
+
+            let altTitles = existingTourTitles[et].allTitles.filter((title) => title != existingTourTitles[et].TourTitle.TITLE);
+
+            if (existingTourTitles[et].allTitles.length > 1) {
+
+                let altTitlesHTML = `<p class='alt-titles'><small> AKA:`
+
+                for (var alts = 0; alts < existingTourTitles[et].allTitles.length; alts++) {
+                    altTitlesHTML += `
+                         -- "${existingTourTitles[et].allTitles[alts]}"  
+                        `;
+                }
+
+                altTitlesHTML += `</small></p>`;
+
+                document.getElementById('existing-tours').innerHTML += `${altTitlesHTML}`;
+            
+            }
+
+            document.getElementById('existing-tours').innerHTML += `
+                    </div>
+                    `;
+        }
+    }
+}
+
 
 
 
@@ -106,8 +283,8 @@ fileInput.addEventListener('change', async function(event) {
             //   if(!tourTitles.includes(columns[1])) tourTitles.push(columns[1]);
 
             }
-            console.log(vouchers);
-            console.log(tourTitles);
+            console.log("vouchers = ", vouchers);
+            console.log("tourTitles = ", tourTitles);
             const content = e.target.result;
             document.getElementById('output').innerText = content;
             document.getElementById('output').innerHTML += `
@@ -118,27 +295,23 @@ fileInput.addEventListener('change', async function(event) {
         };
         reader.readAsText(file);
     }
-    console.log("...try dynamo.mjs 2...");
 
     // GET EXISTING TOURS & TOUR NAMES
-    let toursInDB;
+
     try {
+
         const response = await fetch('../api/query-table');
         const data = await response.json();
-        // console.log("fetched data...", data)
         toursInDB = data.Items;
     } catch (error) {
         console.log(error);
     };
 
-    console.log(toursInDB);
+
+    // let toursInDBLocal = await JSON.parse('[{"TOUR_REGION":"KBT","TOUR":1,"TITLES":["Birth to Boom Driving Tour - Single Day"]},{"TOUR_REGION":"KBT","TOUR":2,"TITLES":["Birth to Boom Driving Tour - Single Day"]},{"TOUR_REGION":"KBT","TOUR":4,"TITLES":["Kentucky Bourbon: Birth to Boom"]}]')
+
 
     // COMPARE NEW VOURCHERS' TOUR NAMES AGAINST EXISTING TOUR NAMES
-
-    console.log("and now to compare...", tourTitles.length);
-
-    // let newTourTitles = [];
-    // let existingTourTitles = [];
 
     for (var nt = 0; nt < tourTitles.length; nt++){
         let titleExists = false;
@@ -155,72 +328,24 @@ fileInput.addEventListener('change', async function(event) {
             newTourTitles.push(tourTitles[nt]);
         } else {
             console.log("Existing Tour Name: ", tourTitles[nt].TITLE);
+
+
+
             existingTourTitles.push({
                 "TourTitle": tourTitles[nt],
-                "tourNumber": tourNumber
+                "allTitles": toursInDB[et].TITLES,
+                "tourNumber": tourNumber,
+                "dbIndex": et
             });
         }
     }
 
-    //  DISPLAY RESULTS AND GET CONFIRMATION
-    document.getElementById('results').style.display = "inline-block";
+    console.log("after initial sorting...")
+    console.log(existingTourTitles)
+    console.log(newTourTitles)
 
-    // insert new Tours
-    if(newTourTitles.length < 1){
-        document.getElementById('new-tours').innerText += `No New Tours`;
-    } else {
-        for (var nt = 0; nt < newTourTitles.length; nt++){
-            document.getElementById('new-tours').innerHTML += `
-            <div>
-                <p>
-                    ${newTourTitles[nt].TITLE} | ${newTourTitles[nt].COUNT}
-                    <button class="new-tour-true" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
-                    <button class="new-tour-false" data-tour-index="${nt}" onclick="handleNewTourFalse(event)">No, not a new tour</button>
-                </p>
-            </div>
-            `
-        }
-    }
+    displayTourTitleResults();
 
-
-    //  insert existing tours that have new vouchers in the uploaded csv...
-    if(existingTourTitles.length < 1){
-
-    } else {
-        for (var et = 0; et < existingTourTitles.length; et++){
-            document.getElementById('existing-tours').innerHTML += `
-                <div>
-                    <p>
-                        ${existingTourTitles[et].TourTitle.TITLE} | ${existingTourTitles[et].TourTitle.COUNT}
-                        <button class="existing-tour-true" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
-                        <button class="existing-tour-change" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
-                        <button class="existing-tour-false" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, this is a new tour</button>
-                    </p>
-                `;
-
-            let tourNumber = existingTourTitles[et].tourNumber;
-
-            if(toursInDB[tourNumber].TITLES.length > 1){
-                document.getElementById('existing-tours').innerHTML += `
-                    <p class='alt-titles'><small> AKA: 
-                    `;
-                for (var alts = 0; alts < toursInDB[tourNumber].TITLES.length; alts++){
-                    document.getElementById('existing-tours').innerHTML += `
-                    "${toursInDB[tourNumber].TITLES[alts]}"  
-                    `;
-                }
-                document.getElementById('existing-tours').innerHTML += `
-                    </small></p>
-                    `;
-
-            }
-
-            document.getElementById('existing-tours').innerHTML += `
-                </div>
-                `;
-        }
-    }
-    
 });
 
 
