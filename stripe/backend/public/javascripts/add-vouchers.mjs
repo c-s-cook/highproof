@@ -40,15 +40,56 @@ const checkAllConfirmed = () => {
         if(!existingTourTitles[t].confirmed) return;
     }
 
+    console.log("test  1   b4 the displayVouher() call...", existingTourTitles, newTourTitles)
+
     // If any new titles are NOT confirmed, return/end
     for(let t = 0; t < newTourTitles.length; t++){
-        if(!newTourTitles.confirmed) return;
+        if(!newTourTitles[t].confirmed) return;
     }
+
+    console.log("test  2   b4 the displayVouher() call...")
     
     // If we make it here, assume that all titles have been confirmed...
     
-    let voucherResults = document.getElementById('voucher-results');
-    let voucherTable = document.getElementById('voucher-table');
+    // Add tourNumber from existingTourTitles to matching vouchers...
+    for(let t = 0; t < existingTourTitles.length; t++){
+        for(let v = 0; v < vouchers.length; v++){
+            if(vouchers[v].TourTitle == existingTourTitles[t].TourTitle.TITLE){
+                vouchers[v].TOUR = existingTourTitles[t].tourNumber;
+
+                if(existingTourTitles[t].updateDBLinks) vouchers[v].allTitles = existingTourTitles[t].allTitles
+            }
+        }
+    }
+
+    
+
+    console.log("test  3   b4 the displayVouher() call...")
+    // Add new tourNumber for newTourTitles to matching vouchers...
+    let tourNumbers = []
+    toursInDB.map((tour) => tourNumbers.push(tour.TOUR))
+    let newTourNum = Math.max(...tourNumbers)
+
+    console.log('newTourNum = ', newTourNum)
+
+    
+
+    console.log("test   4   b4 the displayVouher() call...")
+
+    for(let t = 0; t < newTourTitles.length; t++){
+        newTourNum += 1;
+        console.log(newTourNum)
+        for(let v = 0; v < vouchers.length; v++){
+            if(vouchers[v].TourTitle == newTourTitles[t].TourTitle.TITLE){
+                vouchers[v].TOUR = newTourNum
+                vouchers[v].isNewTour = true
+                vouchers[v].allTitles = null
+            }
+        }
+    }
+
+    console.log("test b4 the displayVouher() call...")
+    displayVouchers();
 
 
 
@@ -144,6 +185,7 @@ const handleNewTourFalse = (e, newOrExist) => {
     // console.log("Clicked, and found this array index: ",i)
     // console.log("Tour Title in question is -> ", newTourTitles[i].TourTitle.TITLE)
 
+    document.getElementById('existing-tour-false').style.display = "none";
     
     let menu = document.getElementById('new-tour-false');
     menu.style.display = "block";
@@ -399,7 +441,7 @@ function displayTourTitleResults() {
     }
 }
 
-
+// should not every need to use this a newly-imported voucher CSV
 function updateVoucherTitle(ogTitle, newTitle) {
     // update voucher.Title
     for(let v = 0; v < vouchers.length; v++){
@@ -407,7 +449,8 @@ function updateVoucherTitle(ogTitle, newTitle) {
     }
 }
 
-
+// ...actually, should not every need to use this at this stage
+// ...it would likely mess things up way too much
 function updateVoucherLinks(ogTitle, newTitle, ogLink){
 
     // this function should only be run AFTER the voucher's .TourTitle has been updated with the New Title
@@ -441,6 +484,7 @@ function displayVouchers(){
 
     let results = document.getElementById('voucher-results')
     let table = document.getElementById('voucher-body')
+    table.innerHTML = ''
 
     let toUpdateDBLinks = []
     for (let t = 0; t < existingTourTitles.length; t++){
@@ -449,19 +493,31 @@ function displayVouchers(){
 
 
     vouchers.map((voucher) => {
-        console.log(voucher)
+        // console.log(voucher)
 
         let isRedeemed = voucher.REDEEMED ? 'T' : 'F'
         let isAvailable = voucher.AVAILABLE ? 'T' : 'F'
 
+        let isNewTour = voucher.isNewTour ? 'class="new-tour"' : ''
+
+        let isUpdatedTitle = voucher.allTitles ? ' class="updated-title"' : '';
+        let oldTitles = ''
+        if(voucher.allTitles){
+            oldTitles = 'title="Former Titles:'
+            for(let t = 1; t < voucher.allTitles.length; t++){
+                oldTitles += `&#10;${voucher.allTitles[t]}`
+            }
+            oldTitles += '"'
+        }
+
         table.innerHTML += `
         <tr>
             <td>${voucher.VOUCHER_ID}</td>
-            <td>${voucher.TOUR}</td>
-            <td>${voucher.TourTitle}</td>
+            <td ${isUpdatedTitle} ${isNewTour}>${voucher.TOUR}</td>
+            <td ${isUpdatedTitle} ${oldTitles}>${voucher.TourTitle}</td>
             <td class='${voucher.REDEEMED}'>${isRedeemed}</td>
             <td class='${voucher.AVAILABLE}'>${isAvailable}</td>
-            <td>${voucher.LINK}</td>
+            <td ${isUpdatedTitle}>${voucher.LINK}</td>
             <td>${voucher.CREATED}</td>
         </tr>
         `

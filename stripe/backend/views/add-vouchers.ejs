@@ -26,6 +26,7 @@
         </div>
       </div>
 
+      <!-- VOUCHER TABLE -->
       <div id="voucher-results" style="display: block;">
         <h3>VOUCHERS:</h3>
         <table id="voucher-table">
@@ -43,11 +44,52 @@
           <tbody id="voucher-body">
 
           </tbody>
-
-
         </table>
+      </div>
+      <!-- END   POP-UP -->
+
+      <div id="action-items" style="display: flex;">
+        <h2>ACTION ITEMS:</h2>
+        <div id="tours-to-update">
+          <h3>UPDATE TOURS:</h3>
+          <p>Looks like we need to update the Active Title (and therefore also the links?) for the following tours:</p>
+          <div class="tours-list"></div>
+        </div>
+
+        <div id="tours-to-create">
+          <h3>CREATE NEW TOURS:</h3>
+          <p>The following new tours will be added to the database:</p>
+          <div class="tours-list"></div>
+        </div>
+
+        <div id="vouchers-to-update">
+          <h3>UPDATE VOUCHERS:</h3>
+          <p>Because the following tours have a new Active Title, any previously uploaded vouchers likely need their link updated.</p>
+          <div class="voucher-list">
+            <p class="results" style="visibility: hidden;"></p>
+            <button id="check-db-vouchers">Check Vouchers</button>
+          </div>
+        </div>
+
+        <div id="vouchers-to-upload">
+          <h3>UPLOAD VOUCHERS:</h3>
+          <p>First, check to see if any of these current vouchers are already in the database.</p>
+          <div class="check-db">
+            <p class="results" style="visibility: hidden;"></p>
+            <button class="check-existing-vouchers">Check Database</button>
+          </div>
+
+          <div class="upload-to-db">
+            <p>Okay. Nothing left to do now but finally upload these new vouchers!</p>
+            <p class="results" style="visibility: hidden;"></p>
+            <button class="upload-vouchers">Upload Vouchers</button>
+          </div>
+
+
+        </div>
 
       </div>
+
 
 
       <!-- POP-UP -->
@@ -73,6 +115,8 @@
         </div>
       </div> 
       <!-- END  POP-UP -->
+
+    
 
       
 
