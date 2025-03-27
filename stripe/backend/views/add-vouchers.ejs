@@ -4,33 +4,58 @@
     <h1><%= title %></h1>
     <p>And now we add more vouchers...</p>
     <div id="admin-options">
-      <button>Select CSV File</button>
+      <div id="input">
+        <button>Select CSV File</button>
 
-      <input type="file" id="fileInput" accept=".csv" />
+        <input type="file" id="fileInput" accept=".csv" />
+      </div>
 
-      <pre id="output"></pre>
 
 
-      <div id="results" style="display: none;">
-        <h2>RESULTS</h2>
+      <div id="title-results" style="display: none;">
+        <h2>TOUR TITLE RESULTS</h2>
         <div>
-          <h3>EXISTING TOURS</h3>
+          <h3>EXISTING TOURS:</h3>
           <p>Found vouchers for the following, exisiting tour(s):</p>
           <div id="existing-tours"></div>
         </div>
-        <div >
+        <div>
           <h3>NEW TOURS:</h3>
           <p>These are the new tours that aren't connected to any existing tour(s):</p>
           <div id="new-tours"></div>
         </div>
       </div>
 
+      <div id="voucher-results" style="display: block;">
+        <h3>VOUCHERS:</h3>
+        <table id="voucher-table">
+          <thead>
+            <tr>
+              <th class="voucher-th id">ID</th>
+              <th class="voucher-th tour-id">TOUR</th>
+              <th class="voucher-th title">TITLE</th>
+              <th class="voucher-th redeemed">REDEEMED</th>
+              <th class="voucher-th available">AVAILABLE</th>
+              <th class="voucher-th link">LINK</th>
+              <th class="voucher-th created">CREATED</th>
+            </tr>
+          </thead>
+          <tbody id="voucher-body">
+
+          </tbody>
+
+
+        </table>
+
+      </div>
+
+
+      <!-- POP-UP -->
       <div id="pop-up-bg" class="pop-up" style="display: none;"></div>
       
       <div id="pop-up" class="pop-up" style="display: none;">
         <p id="close-pop-up">&#9747</p>
         <div id="pop-up-content">
-
 
           <div id="new-tour-false" style="display: none;">
             <p>Is the text below a <i>new title</i> for an an existing tour?</p>
@@ -39,10 +64,19 @@
             <div id="ntf-existing-tours-list"></div>
           </div>
 
+          <div id="existing-tour-false" style="display: none;">
+            <input type="text">
+            <p id="error"></p>
+            <button>Submit</button>
+          </div>
+
         </div>
-        
-        
-      </div>
+      </div> 
+      <!-- END  POP-UP -->
+
+      
+
+      <pre id="output"></pre>
       
       <link rel='stylesheet' href='/stylesheets/add-vouchers.css' />
       <script defer src="../javascripts/add-vouchers.mjs"></script>

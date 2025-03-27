@@ -44,8 +44,8 @@ const addTour = async () => {
         TableName: "TOURS2",
         Item: {
             TOUR_REGION: "KBT",
-            TOUR: 4,
-            TITLES: ["Kentucky Bourbon: Birth to Boom"],
+            TOUR: 5,
+            TITLES: ["Kentucky Bourbon Tour Day 2 | Heaven Hill, Four Roses, Woodford", "Kentucky Bourbon: Birth to Boom (Day 2/2) | From Heaven Hill"],
         },
     });
 

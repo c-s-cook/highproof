@@ -1,6 +1,6 @@
 
+"use strict"
 let fileInput = document.getElementById('fileInput');
-if(fileInput) console.log("found fileInput!");
 
 
 let vouchers = [];
@@ -28,46 +28,89 @@ function togglePopUp() {
 
 
 document.getElementById('close-pop-up').addEventListener("click", togglePopUp);
-// let closePopUp = document.getElementById('close-pop-up');
-// closePopUp.addEventListener("click", ()=>{
-//     togglePopUp();
-// });
 
 
 
-const handleNewTourTrue = (e) => {
-    togglePopUp();
+
+const checkAllConfirmed = () => {
+    console.log("this is where we check to see if all of the tour titles for all of the vouchers have been confirmed...")
+
+    // If any existing titles are NOT confirmed, return/end
+    for (let t = 0; t < existingTourTitles.length; t++){
+        if(!existingTourTitles[t].confirmed) return;
+    }
+
+    // If any new titles are NOT confirmed, return/end
+    for(let t = 0; t < newTourTitles.length; t++){
+        if(!newTourTitles.confirmed) return;
+    }
     
-    let i = e.target.dataset.tourIndex;
-    console.log("Clicked, and found this array index: ",i)
-    console.log("Tour Title in question is -> ", newTourTitles[i].TITLE)
+    // If we make it here, assume that all titles have been confirmed...
+    
+    let voucherResults = document.getElementById('voucher-results');
+    let voucherTable = document.getElementById('voucher-table');
+
+
+
 }
 
 
 
 
-const handleCorrectedTourSelected = (e, tourDBNum, i, dbIndex) => {
 
-    console.log("Picked a tour. It was tour: ", tourDBNum);
-    console.log(existingTourTitles)
-    console.log(newTourTitles)
-    let allTitles = toursInDB[dbIndex].TITLES
-    allTitles.push(newTourTitles[i].TITLE)
 
-    existingTourTitles.push({
-        "TourTitle": {
-            "TITLE": newTourTitles[i].TITLE,
-            "COUNT": newTourTitles[i].COUNT
-        },
-        "allTitles": allTitles,
-        "tourNumber": tourDBNum, 
-        "dbIndex": dbIndex
-    });
-    newTourTitles.splice(i, 1);
+const handleNewTourTrue = (e) => {
+   
+    let i = e.target.dataset.tourIndex;
+    // console.log("Clicked, and found this array index: ",i)
+    // console.log("Tour Title in question is -> ", newTourTitles[i].TourTitle.TITLE)
+
+    // console.log(document.querySelector(`.new-tour.checked, [data-tour-index="${i}"]`));
+    document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
+    e.target.disabled = true;
+    
+    newTourTitles[i].confirmed = true,
+    checkAllConfirmed();
+}
+
+
+
+
+const handleNewTourFalseSelection = async (e, tourDBNum, i, dbIndex, newOrExist) => {
+
+
+    let allTitles = []
+    // have to map through it b/c of deepfreeze
+    toursInDB[dbIndex].TITLES.map((title) => allTitles.push(title));
+    console.log("allTitles = ", allTitles)
+    
+    if (newOrExist == "new-tour") {
+        allTitles.unshift(newTourTitles[i].TourTitle.TITLE)
+
+        existingTourTitles.push({
+            "TourTitle": {
+                "TITLE": newTourTitles[i].TourTitle.TITLE,
+                "COUNT": newTourTitles[i].TourTitle.COUNT
+            },
+            "allTitles": allTitles,
+            "tourNumber": tourDBNum, 
+            "dbIndex": dbIndex,
+            "updateDBLinks": true
+        });
+        newTourTitles.splice(i, 1);
+    } else if (newOrExist == "existing-tour"){
+        allTitles.unshift(existingTourTitles[i].TourTitle.TITLE)
+        existingTourTitles[i].allTitles = allTitles
+        existingTourTitles[i].tourNumber = tourDBNum
+        existingTourTitles[i].dbIndex = dbIndex
+        existingTourTitles[i].updatedTourTitle = true
+    }
+
 
     console.log("after push and splice...")
     console.log(existingTourTitles)
     console.log(newTourTitles)
+    console.log("toursInDB[0] = ", toursInDB[0])
 
     togglePopUp();
     document.getElementById('new-tour-false').style.display = "none";
@@ -75,18 +118,31 @@ const handleCorrectedTourSelected = (e, tourDBNum, i, dbIndex) => {
     
 }
 
-const handleNewTourFalse = (e) => {
+const handleNewTourFalse = (e, newOrExist) => {
+
+    let i = e.target.dataset.tourIndex;
+
+    if (!newOrExist){ 
+        newOrExist = "new-tour";
+        newTourTitles[i].confirmed = false;
+    } else {
+        existingTourTitles[i].confirmed = false;
+    }
+
+    console.log(newOrExist, i);
+    console.log("toursInDB = ", toursInDB)
+
+    document.querySelector(`.${newOrExist}.checked[data-tour-index="${i}"]`).style.visibility = "hidden";
+    document.querySelector(`.${newOrExist}.true[data-tour-index="${i}"]`).disabled = false;
     togglePopUp();
 
+    // console.log("upon entering handleNewTourFalse()...")
+    // console.log(existingTourTitles)
+    // console.log(newTourTitles)
     
-
-    console.log("upon entering handleNewTourFalse()...")
-    console.log(existingTourTitles)
-    console.log(newTourTitles)
-    
-    let i = e.target.dataset.tourIndex;
-    console.log("Clicked, and found this array index: ",i)
-    console.log("Tour Title in question is -> ", newTourTitles[i].TITLE)
+   
+    // console.log("Clicked, and found this array index: ",i)
+    // console.log("Tour Title in question is -> ", newTourTitles[i].TourTitle.TITLE)
 
     
     let menu = document.getElementById('new-tour-false');
@@ -94,74 +150,191 @@ const handleNewTourFalse = (e) => {
 
     
     let menuTitle = document.getElementById('ntf-title');
-    menuTitle.innerText = `"${newTourTitles[i].TITLE}"`
-
-
+    menuTitle.innerText = newOrExist == "existing-tour" ? `"${existingTourTitles[i].TourTitle.TITLE}"` : `"${newTourTitles[i].TourTitle.TITLE}"`
 
     let menuTourList = document.getElementById('ntf-existing-tours-list');
-    toursInDB.map((tour, dbIndex) => {
-        
+    menuTourList.innerHTML = '';
+
+    let tourNumbers = [];
+    for(let et = 0; et < existingTourTitles.length; et++){
+        tourNumbers.push(existingTourTitles[et].tourNumber)
+    }
+
+    // console.log("tourNumbers = ", tourNumbers);
+
+    for(let db = 0; db < toursInDB.length; db++){
+        if(tourNumbers.includes(toursInDB[db].TOUR)) break;
+
         let listTheTitles = () => {
             let titleList = ``;
-            for(let t = tour.TITLES.length; t > 0; t--){
-                let isMainTitle = (t == tour.TITLES.length) ? `style="font-weight: bold"` : ``;
-                titleList += `<p ${isMainTitle}>${tour.TITLES[t-1]}</p>`
+            for(let t = 0; t < toursInDB[db].TITLES.length; t++){
+                let isMainTitle = (t == 0) ? `style="font-weight: bold"` : ``;
+                titleList += `<p ${isMainTitle}>${toursInDB[db].TITLES[t]}</p>`
             }
             
             return titleList
         }
         menuTourList.innerHTML += `
-        <div class="menu-tours-list" onclick="handleCorrectedTourSelected(event, ${tour.TOUR}, ${i}, ${dbIndex})">
-            <p>${tour.TOUR}</p>
+        <div class="menu-tours-list" onclick="handleNewTourFalseSelection(event, ${toursInDB[db].TOUR}, ${i}, ${db}, '${newOrExist}')">
+            <p>${toursInDB[db].TOUR}</p>
             <div>
                 ${listTheTitles()}
             </div>
         `;
-    })
+    }
 
 
+    console.log("toursInDB at end of handleNewToursFalse() = ", toursInDB)
 
+    setTimeout(() => {
+        console.log("toursInDB after timeout = ", toursInDB)
+    }, 3000)
 }
 
 
 const handleExistingTourTrue = (e) => {
     
-    
     let i = e.target.dataset.tourIndex;
-    console.log("Clicked, and found this array index: ",i)
-    console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+    // console.log("Clicked, and found this array index: ",i)
+    // console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
 
-    console.log(document.querySelector(`.existing-tour.checked, [data-tour-index="${i}]`));
-    document.querySelector(`.existing-tour.checked, [data-tour-index="${i}]`).style.visibility = "visible";
+    // console.log(document.querySelector(`.existing-tour.checked[data-tour-index="${i}"]`));
+    document.querySelector(`.existing-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
+    e.target.disabled = true;
+    
+    existingTourTitles[i].confirmed = true;
+    checkAllConfirmed();
 
 }
 
 
 const handleExistingTourChange = (e) => {
-    togglePopUp();
+    // togglePopUp();
     
     let i = e.target.dataset.tourIndex;
-    console.log("Clicked, and found this array index: ",i)
+    console.log("Clicked Exisitng but Different... and found this array index: ",i)
     console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+
+    handleNewTourFalse(e, "existing-tour");
+
+
+
 }
 
 
 const handleExistingTourFalse = (e) => {
-    togglePopUp();
     
     let i = e.target.dataset.tourIndex;
-    console.log("Clicked, and found this array index: ",i)
-    console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+    // console.log("Clicked, and found this array index: ",i)
+    // console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
+
+    document.querySelector(`.existing-tour.checked[data-tour-index="${i}"]`).style.visibility = "hidden";
+    document.querySelector(`.existing-tour.true[data-tour-index="${i}"]`).disabled = false;
+    existingTourTitles[i].confirmed = false;
+
+    let oldMenu = document.getElementById('new-tour-false');
+    oldMenu.style.display = "none";
+
+    let menu = document.getElementById('existing-tour-false');
+    menu.style.display = "block";
+
+    let input = document.querySelector('#existing-tour-false input[type="text"]');
+    input.value = existingTourTitles[i].TourTitle.TITLE;
+
+    let errMessage = document.querySelector('#existing-tour-false p#error');
+    errMessage.innerText = "testing error";
+    errMessage.style.visibility = "hidden";
+
+    let sbmtButton = document.querySelector('#existing-tour-false button');
+
+    sbmtButton.innerText += "??";
+
+    sbmtButton.addEventListener('click', ()=> {
+
+        errMessage.innerHTML = "";
+
+        let titleConflict = null;
+
+        // Check submitted title against current & past titles of existing tours...
+        for (let t = 0; t < toursInDB.length; t++){
+            if(toursInDB[t].TITLES.includes(input.value)){
+                let index = 0;
+                while(index < toursInDB[t].TITLES.length){
+                    if (toursInDB[t].TITLES[index] == input.value) break;                    
+                }
+                titleConflict = {
+                    "isNew": false,
+                    "tour": toursInDB[t],
+                    "index": index
+                }
+                break;
+            }
+        }
+
+        // Check submited title against the titles of any new tours...
+        for (let t = 0; t < newTourTitles.length; t++){
+            if(newTourTitles[t].TourTitle.TITLE == input.value){
+                titleConflict = {
+                    "isNew": true,
+                    "tour": newTourTitles[t].TourTitle.TITLE,
+                    "index": null
+
+                }
+            }
+        }
+
+        if(titleConflict){
+            if(titleConflict.isNew){
+                errMessage.innerHTML += `
+                <p class="error">ERROR: CONFLICT WITH ANOTHER NEW TOUR</p>
+                <p style="font-weight: bold">${titleConflict.tour}</p>
+                `
+            } else {
+                if(titleConflict.index == 0){
+                    errMessage.innerHTML += `
+                    <p class="error">ERROR: CONFLICT WITH TOUR #${titleConflict.tour.TOUR}</p>
+                    `
+                } else {
+                    errMessage.innerHTML += `
+                    <p class="warning">WARNING: MATCHES WITH TOUR #${titleConflict.tour.TOUR}</p>
+                    `
+                }
+                for(let t = 0; t < titleConflict.tour.TITLES.length; t++){
+                    let isMatch = (t == titleConflict.index) ? 'style="font-weight:bold"' : '';
+                    errMessage.innerHTML += `
+                    <p ${isMatch}>${titleConflict.tour.TITLES[t]}</p>
+                    `
+                }
+            }
+
+            errMessage.style.visibility = "visible";
+        } else {
+            console.log("All good, bro!");
+            newTourTitles.push({
+                "TourTitle": {
+                    "TITLE": existingTourTitles[i].TourTitle.TITLE,
+                    "COUNT":existingTourTitles[i].TourTitle.COUNT
+                },
+                "confirmed": false,
+            })
+            existingTourTitles.splice(i, 1);
+            togglePopUp();
+            menu.style.display = "none";
+            displayTourTitleResults();
+        }
+
+    })
+
+
+    togglePopUp();
 }
-
-
-
-
 
 
 function displayTourTitleResults() {
     //  DISPLAY RESULTS AND GET CONFIRMATION
-    document.getElementById('results').style.display = "inline-block";
+    document.getElementById('title-results').style.display = "block";
+
+    document.getElementById('input').style.display = "none";
 
     // insert new Tours
     if (newTourTitles.length < 1) {
@@ -172,10 +345,10 @@ function displayTourTitleResults() {
             document.getElementById('new-tours').innerHTML += `
                 <div>
                     <p>
-                        <span class="new-tour checked ${nt}" style="visibility:hidden">&#9989</span>
-                        ${newTourTitles[nt].TITLE} | ${newTourTitles[nt].COUNT}
-                        <button class="new-tour true" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
-                        <button class="new-tour false" data-tour-index="${nt}" onclick="handleNewTourFalse(event)">No, not a new tour</button>
+                        <span class="new-tour checked ${nt}" data-tour-index="${nt}" style="visibility:hidden">&#9989</span>
+                        ${newTourTitles[nt].TourTitle.TITLE} | ${newTourTitles[nt].TourTitle.COUNT}
+                        <button class="new-tour true ${nt}" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
+                        <button class="new-tour false ${nt}" data-tour-index="${nt}" onclick="handleNewTourFalse(event)">No, not a new tour</button>
                     </p>
                 </div>
                 `
@@ -193,7 +366,7 @@ function displayTourTitleResults() {
             document.getElementById('existing-tours').innerHTML += `
                     <div>
                         <p>
-                            <span class="existing-tour checked ${et}" style="visibility:hidden">&#9989</span>
+                            <span class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</span>
                             ${existingTourTitles[et].TourTitle.TITLE} | ${existingTourTitles[et].TourTitle.COUNT}
                             <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
                             <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
@@ -205,11 +378,11 @@ function displayTourTitleResults() {
 
             if (existingTourTitles[et].allTitles.length > 1) {
 
-                let altTitlesHTML = `<p class='alt-titles'><small> AKA:`
+                let altTitlesHTML = `<p class='alt-titles'><small> FORMERLY:`
 
-                for (var alts = 0; alts < existingTourTitles[et].allTitles.length; alts++) {
+                for (var alts = 1; alts < existingTourTitles[et].allTitles.length; alts++) {
                     altTitlesHTML += `
-                         -- "${existingTourTitles[et].allTitles[alts]}"  
+                        "${existingTourTitles[et].allTitles[alts]}"  --  
                         `;
                 }
 
@@ -227,17 +400,80 @@ function displayTourTitleResults() {
 }
 
 
+function updateVoucherTitle(ogTitle, newTitle) {
+    // update voucher.Title
+    for(let v = 0; v < vouchers.length; v++){
+        if(ogTitle == vouchers[v].TourTitle) vouchers[v].TourTitle = newTitle
+    }
+}
 
 
+function updateVoucherLinks(ogTitle, newTitle, ogLink){
+
+    // this function should only be run AFTER the voucher's .TourTitle has been updated with the New Title
+
+    if(!ogTitle || !newTitle || !ogLink) {
+        console.log("updateVoucherLinks() ERROR --> Missing at least one param")
+        return
+    } 
+
+    let ogLinkTitle = ogTitle.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
+    console.log(ogTitle);
+
+    let newLinkTitle = newTitle.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
+    console.log(newTitle);
+
+    let splitLink = ogLink.split(ogTitle)
+    let newLink = `${splitLink[0]}${newTitle}${splitLink[1]}`
+
+    console.log(`Initial link is --> ${ogLink}`)
+    console.log(`New link is     --> ${newLink}`)
+
+    for(let v = 0; v < vouchers.length; v++){
+        if(newTitle == vouchers[v].TourTitle && ogLink == vouchers[v].LINK){
+            vouchers[v].LINK = newLink
+        }
+    }
+}
+
+function displayVouchers(){
+    console.log("in displayVouchers()")
+
+    let results = document.getElementById('voucher-results')
+    let table = document.getElementById('voucher-body')
+
+    let toUpdateDBLinks = []
+    for (let t = 0; t < existingTourTitles.length; t++){
+        if(existingTourTitles[t].updateDBLinks) toUpdateDBLinks.push(existingTourTitles[t].TourTitle.TITLE)
+    }
+
+
+    vouchers.map((voucher) => {
+        console.log(voucher)
+
+        let isRedeemed = voucher.REDEEMED ? 'T' : 'F'
+        let isAvailable = voucher.AVAILABLE ? 'T' : 'F'
+
+        table.innerHTML += `
+        <tr>
+            <td>${voucher.VOUCHER_ID}</td>
+            <td>${voucher.TOUR}</td>
+            <td>${voucher.TourTitle}</td>
+            <td class='${voucher.REDEEMED}'>${isRedeemed}</td>
+            <td class='${voucher.AVAILABLE}'>${isAvailable}</td>
+            <td>${voucher.LINK}</td>
+            <td>${voucher.CREATED}</td>
+        </tr>
+        `
+    })
+
+    
+}
 
 
 
 fileInput.addEventListener('change', async function(event) {
     const file = event.target.files[0];
-    
-    // var vouchers = [];
-    // var tourTitles = [];
-    // var availableVouchers = [];
 
     if (file) {
         const reader = new FileReader();
@@ -252,9 +488,9 @@ fileInput.addEventListener('change', async function(event) {
                 "VOUCHER_ID": columns[0],
                 "TourTitle": columns[1],
                 "Quantity": columns[2],
-                "Redeemed": columns[3],
+                "REDEEMED": columns[3] == "0" ? false : true,
                 "State": columns[4],
-                "TOUR_ID": null,
+                "TOUR": null,
                 "LINK": columns[5],
                 "AVAILABLE": columns[3] == "0" ? true : false,
                 "CREATED": columns[6],
@@ -262,7 +498,7 @@ fileInput.addEventListener('change', async function(event) {
                 "TRANSACTION_ID": null  //Str / Foreign Key
               }
               vouchers.push(voucher);
-              if(voucher.Redeemed != "1") availableVouchers.push(voucher);
+              if(voucher.REDEEMED != "1") availableVouchers.push(voucher);
 
               var foundIt = false;
               if (tourTitles.length > 0){
@@ -283,10 +519,14 @@ fileInput.addEventListener('change', async function(event) {
             //   if(!tourTitles.includes(columns[1])) tourTitles.push(columns[1]);
 
             }
+
+
             console.log("vouchers = ", vouchers);
             console.log("tourTitles = ", tourTitles);
-            const content = e.target.result;
-            document.getElementById('output').innerText = content;
+
+
+            // const content = e.target.result;
+            // document.getElementById('output').innerText = content;
             document.getElementById('output').innerHTML += `
             
             <p>Vouchers to add: ${vouchers.length}</p>
@@ -297,12 +537,18 @@ fileInput.addEventListener('change', async function(event) {
     }
 
     // GET EXISTING TOURS & TOUR NAMES
-
     try {
 
         const response = await fetch('../api/query-table');
         const data = await response.json();
         toursInDB = data.Items;
+        Object.freeze(toursInDB);
+        for(let o = 0; o < toursInDB.length; o++){
+            Object.freeze(toursInDB[o].TITLES)
+            Object.freeze(toursInDB[o])
+        }
+        
+        console.log("toursInDB = ", toursInDB)
     } catch (error) {
         console.log(error);
     };
@@ -317,7 +563,7 @@ fileInput.addEventListener('change', async function(event) {
         let titleExists = false;
         let tourNumber = null;
         for (var et = 0; et < toursInDB.length; et++){
-            if(toursInDB[et].TITLES.includes(tourTitles[nt].TITLE)) {
+            if(toursInDB[et].TITLES[0] == tourTitles[nt].TITLE) {
                 titleExists = true;
                 tourNumber = et;
                 console.log("Found tour - ", tourTitles[nt].TITLE, " - in TOUR ", toursInDB[et].TOUR, ". --> ", toursInDB[et].TITLES);
@@ -325,17 +571,19 @@ fileInput.addEventListener('change', async function(event) {
         }
         if (!titleExists) {
             console.log("New Tour Name: ", tourTitles[nt].TITLE);
-            newTourTitles.push(tourTitles[nt]);
+            newTourTitles.push({
+                "TourTitle": tourTitles[nt],
+                "confirmed": false
+            });
         } else {
             console.log("Existing Tour Name: ", tourTitles[nt].TITLE);
 
-
-
             existingTourTitles.push({
                 "TourTitle": tourTitles[nt],
-                "allTitles": toursInDB[et].TITLES,
-                "tourNumber": tourNumber,
-                "dbIndex": et
+                "allTitles": toursInDB[tourNumber].TITLES,
+                "tourNumber": toursInDB[tourNumber].TOUR,
+                "dbIndex": tourNumber,
+                "confirmed": false
             });
         }
     }
@@ -344,7 +592,9 @@ fileInput.addEventListener('change', async function(event) {
     console.log(existingTourTitles)
     console.log(newTourTitles)
 
+    displayVouchers();
     displayTourTitleResults();
+    
 
 });
 
