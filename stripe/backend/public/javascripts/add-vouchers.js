@@ -1,5 +1,7 @@
 
 "use strict"
+
+
 let fileInput = document.getElementById('fileInput');
 
 
@@ -33,22 +35,18 @@ document.getElementById('close-pop-up').addEventListener("click", togglePopUp);
 
 
 const checkAllConfirmed = () => {
-    console.log("this is where we check to see if all of the tour titles for all of the vouchers have been confirmed...")
 
     // If any existing titles are NOT confirmed, return/end
     for (let t = 0; t < existingTourTitles.length; t++){
         if(!existingTourTitles[t].confirmed) return;
     }
 
-    console.log("test  1   b4 the displayVouher() call...", existingTourTitles, newTourTitles)
-
     // If any new titles are NOT confirmed, return/end
     for(let t = 0; t < newTourTitles.length; t++){
         if(!newTourTitles[t].confirmed) return;
     }
-
-    console.log("test  2   b4 the displayVouher() call...")
     
+
     // If we make it here, assume that all titles have been confirmed...
     
     // Add tourNumber from existingTourTitles to matching vouchers...
@@ -62,19 +60,10 @@ const checkAllConfirmed = () => {
         }
     }
 
-    
-
-    console.log("test  3   b4 the displayVouher() call...")
     // Add new tourNumber for newTourTitles to matching vouchers...
     let tourNumbers = []
     toursInDB.map((tour) => tourNumbers.push(tour.TOUR))
     let newTourNum = Math.max(...tourNumbers)
-
-    console.log('newTourNum = ', newTourNum)
-
-    
-
-    console.log("test   4   b4 the displayVouher() call...")
 
     for(let t = 0; t < newTourTitles.length; t++){
         newTourNum += 1;
@@ -84,15 +73,14 @@ const checkAllConfirmed = () => {
                 vouchers[v].TOUR = newTourNum
                 vouchers[v].isNewTour = true
                 vouchers[v].allTitles = null
+                newTourTitles[t].tourNumber = newTourNum
             }
         }
     }
 
-    console.log("test b4 the displayVouher() call...")
     displayVouchers();
-
-
-
+    displayActionItems();
+    
 }
 
 
@@ -258,9 +246,6 @@ const handleExistingTourChange = (e) => {
     console.log("Tour Title in question is -> ", existingTourTitles[i].TourTitle.TITLE)
 
     handleNewTourFalse(e, "existing-tour");
-
-
-
 }
 
 
@@ -526,6 +511,86 @@ function displayVouchers(){
     
 }
 
+
+function displayActionItems(){
+    console.log("display action items...")
+    document.getElementById('action-items').style.display = 'flex';
+
+    // check existingTourTitles for updated titles...
+    actionUpdateTours()
+
+    // check newTourTitles for listing...
+    actionCreateTours()
+
+}
+
+
+
+function actionUpdateTours(){
+    
+    let needUpdating = false;
+
+    let toursList = document.querySelector('#tours-to-update .tours-list tbody')
+    toursList.style.visibility = "visible"
+    // toursList.innerText += "Found it!"
+    
+    // check existingTourTitles for updated titles...
+    existingTourTitles.map((tour) => {
+        if(tour.updateDBLinks) {
+            needUpdating = true;
+            let newTableHTML = ''
+            newTableHTML += `
+            <tr>
+                <td>
+                    <p>${toursInDB[tour.dbIndex].TOUR_REGION} #${toursInDB[tour.dbIndex].TOUR}</p>
+            `
+            for(let t = 0; t < toursInDB[tour.dbIndex].TITLES.length; t++){
+                newTableHTML += `
+                    <p>${toursInDB[tour.dbIndex].TITLES[t]}</p>
+            `
+            }
+
+            newTableHTML += `
+                </td>
+                <td>
+                    <p>${toursInDB[tour.dbIndex].TOUR_REGION} #${tour.tourNumber}</p>
+            `
+            for(let t = 0; t < tour.allTitles.length; t++){
+                newTableHTML += `
+                    <p>${tour.allTitles[t]}</p>
+            `
+            }
+            newTableHTML += `
+                </td>
+            </tr>
+            
+            `
+            toursList.innerHTML += newTableHTML
+        }
+    })
+
+    // if no tours were found in need of updates, give message
+    if(!needUpdating) document.querySelector('#tours-to-update .tours-list').innerText += "No tours found needing title updates."
+
+}
+
+function actionCreateTours(){
+
+    let toursList = document.querySelector('#tours-to-create .tours-list ul')
+    toursList.style.visibility = "visible"
+
+    // check against an empty array
+    if(newTourTitles.length == 0){
+        toursList.innerHTML += '<li><small><italic>No new tours found.</italic></small></li>'
+    } else {
+    // list out any newTourTitles
+        newTourTitles.map((tour) => {
+            
+            toursList.innerHTML += `<li>KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
+        })
+    }
+
+}
 
 
 fileInput.addEventListener('change', async function(event) {

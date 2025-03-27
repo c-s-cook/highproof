@@ -48,18 +48,34 @@
       </div>
       <!-- END   POP-UP -->
 
-      <div id="action-items" style="display: flex;">
+
+      <!-- ACTION ITEMS -->
+      <div id="action-items" style="display: none;">
         <h2>ACTION ITEMS:</h2>
         <div id="tours-to-update">
           <h3>UPDATE TOURS:</h3>
           <p>Looks like we need to update the Active Title (and therefore also the links?) for the following tours:</p>
-          <div class="tours-list"></div>
+          <div class="tours-list">
+            <table>
+              <tbody style="visibility: hidden;">
+                <tr>
+                  <th>FROM:</th>
+                  <th>TO:</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div id="tours-to-create">
           <h3>CREATE NEW TOURS:</h3>
           <p>The following new tours will be added to the database:</p>
-          <div class="tours-list"></div>
+          <div class="tours-list">
+            <ul>
+              
+            </ul>
+
+          </div>
         </div>
 
         <div id="vouchers-to-update">
@@ -89,6 +105,7 @@
         </div>
 
       </div>
+      <!-- END   ACTION ITEMS -->
 
 
 
@@ -123,7 +140,7 @@
       <pre id="output"></pre>
       
       <link rel='stylesheet' href='/stylesheets/add-vouchers.css' />
-      <script defer src="../javascripts/add-vouchers.mjs"></script>
+      <script defer src="../javascripts/add-vouchers.js"></script>
 
 
 
