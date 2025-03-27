@@ -1,31 +1,4 @@
 
-TABLE: VM_VOUCHER_CODES
- - VOUCHER_ID: Str PARTITION KEY
- - TOUR: Str  SORT KEY
- - CODE: str
- - LINK: str
- - AVAILABLE: Boolean
- - CREATED: Date()
- - PURCHASED: Date()
- - TRANSACTION_ID: Str / Foreign Key
-
-
-
- TABLE: CUSTOMERS
-  - CUSTOMER: Str (their email) PARTITION KEY
-  - CONTACT_INFO: {
-      Name: str,
-      Address: {}
-    }
-  - TRANSACTIONS: {}
-
-
-
-  TABLE: TRANSATIONS
-   - TRANSATION_ID: Str (Stripe event ID) PARTITION KEY
-   - CUSTOMER: Str / Foreign Key
-   - VOUCHER_IDS: {}
-   - Date: Date()
    
 
 
@@ -38,3 +11,14 @@ TABLE: VM_VOUCHER_CODES
     - UPDATE that code as NOT Available, and update Purcahse Date
 3. CREATE new Customer
 3. Email Customer Code + Instructions
+
+
+
+
+
+
+
+
+ADD VOUCHER:
+when displaying modified titles, highlight orange, add title with &#10; for a line break
+    - <div title="This is a mouseover text!&#10;Line 1&#10;">

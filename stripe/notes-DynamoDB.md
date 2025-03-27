@@ -5,6 +5,9 @@ DynamoDB QUeries:
 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html
 
 
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/getting-started-step-3.html
+
+
 
 
 
@@ -13,9 +16,10 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html
 TABLE: VM_VOUCHER_CODES
  - VOUCHER_ID: Str PARTITION KEY
  - TOUR_ID: Str  SORT KEY // Foreign Key
- - CODE: str
+ - ///  CODE: - no need for this, the VOUCHER_ID is the code
  - LINK: str
  - AVAILABLE: Boolean
+ - REDEEMED: Boolean // NEW!
  - CREATED: Date()
  - PURCHASED: Date()
  - TRANSACTION_ID: Str / Foreign Key
@@ -23,8 +27,9 @@ TABLE: VM_VOUCHER_CODES
 
 
 TABLE:  TOURS
- - TOUR_ID: Str PARTITION KEY
- - TITLE: []
+ - TOUR_REGION: Str PARTITION KEY
+ - TOUR:  Num  SORT KEY
+ - TITLES: []
  
 
 
