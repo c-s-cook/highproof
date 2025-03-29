@@ -210,3 +210,11 @@
     margin-top: 0px;
 
 }
+
+#vouchers-to-update .voucher-list .results>div {
+    display: flex;
+}
+
+#vouchers-to-update .voucher-list .results .sample-link {
+    font-size: small;
+}

@@ -37,6 +37,72 @@ app.get('/api/query-table', async (req, res) => {
   res.json(response)
 });
 
+// API to add a voucher to the VM_VOUCHER_CODE table. It receives a POST request that follows the Voucher interface from dynamo.ts...
+app.post('/api/add-voucher', async (req, res) => {
+  console.log("...in add-voucher API...");
+  console.log(req.body);
+  let voucher = req.body;
+  try {
+    let response = await dynamo.addVoucher(voucher);
+    console.log(response);
+    res.json({ success: true, message: "Voucher added successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to add voucher." });
+  }
+});
+
+// API to get all vouchers for a specific TOUR from the VM_VOUCHER_CODES table. It receives a GET request with the TOUR parameter...
+app.get('/api/vouchers/:TOUR', async (req, res) => {
+  console.log("...in get-vouchers API...");
+  const { TOUR } = req.params;
+  try {
+    // Call the function to get vouchers for the specified TOUR from the DynamoDB table
+    let response = await dynamo.getVouchersByTour(TOUR);
+    console.log(response);
+    // Send a JSON response with the retrieved vouchers
+    res.json({ success: true, vouchers: response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to retrieve vouchers." });
+  }
+});
+
+
+// API to create a Tour in the VM_TOUR table. It receives a POST request containing TOUR_REGION, TOUR, and TITLES...
+app.post('/api/create-tour', async (req, res) => {
+  console.log("...in create-tour API...");
+  console.log(req.body);
+  const { TOUR_REGION, TOUR, TITLES } = req.body;
+  try {
+    // Call the function to create a new tour in the DynamoDB table
+    let response = await dynamo.createTour({ TOUR_REGION, TOUR, TITLES });
+    console.log(response);
+    // Send a JSON response indicating success
+    res.json({ success: true, message: "Tour created successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to create tour." });
+  }
+});
+
+
+
+// API to update a Tour in the VM_TOUR table. It receives a POST request containing a Tour object that follows the Tour interface from dynamo.ts...
+app.post('/api/update-tour', async (req, res) => {
+  console.log("...in update-tour API...");
+  console.log(req.body);
+  const { TOUR_REGION, TOUR, TITLES } = req.body;
+  try {
+    let response = await dynamo.updateTour({ TOUR_REGION, TOUR, TITLES });
+    console.log(response);
+    res.json({ success: true, message: "Tour updated successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to update tour." });
+  }
+});
+
 
 app.use('/users', usersRouter);
 

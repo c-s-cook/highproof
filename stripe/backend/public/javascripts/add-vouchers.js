@@ -533,8 +533,9 @@ function actionUpdateTours(){
     let toursList = document.querySelector('#tours-to-update .tours-list tbody')
     toursList.style.visibility = "visible"
     // toursList.innerText += "Found it!"
+
     
-    // check existingTourTitles for updated titles...
+    // check existingTourTitles for updated titles and display results...
     existingTourTitles.map((tour) => {
         if(tour.updateDBLinks) {
             needUpdating = true;
@@ -569,10 +570,47 @@ function actionUpdateTours(){
         }
     })
 
-    // if no tours were found in need of updates, give message
-    if(!needUpdating) document.querySelector('#tours-to-update .tours-list').innerText += "No tours found needing title updates."
+    // function for the button to update tours in the database...
+    const updateToursInDB = () => {
+        existingTourTitles.map((tour) => {
+            // This function would typically involve sending the updated tour information to the backend API to update the database...
+            if(tour.updateDBLinks){
+                console.log("Updating Tour in DB...")
+                console.log(tour)
+                fetch('/api/update-tour', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "TOUR_REGION": toursInDB[tour.dbIndex].TOUR_REGION,
+                        "TOUR": tour.tourNumber,
+                        "TITLES": tour.allTitles
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    tour.updatedDBTour = true; // Mark this tour as updated in the DB
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        })
+    }
 
+    // if no tours were found in need of updates, give message
+    if(!needUpdating) {document.querySelector('#tours-to-update .tours-list').innerText += "No tours found needing title updates."}
+    // otherwise, make the update button visible and add event listener...
+    else {
+        let updateToursBtn = document.querySelector('#tours-to-update .tours-list button')
+        updateToursBtn.style.visibility = "visible"
+        updateToursBtn.addEventListener('click', updateToursInDB)
+    }
 }
+
+
 
 function actionCreateTours(){
 
@@ -588,6 +626,178 @@ function actionCreateTours(){
             
             toursList.innerHTML += `<li>KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
         })
+
+        // function for handling the button click to create tours in the database...
+        const createToursInDB = () => {
+            // this function sends the new tours to the backend API to create new tours in the database...
+            console.log("Creating Tours in DB...")
+            console.log(newTourTitles)
+            for (let t = 0; t < newTourTitles.length; t++){
+                fetch('/api/create-tour', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "TOUR_REGION": "KBT", // Using a fixed region for now...
+                        "TOUR": newTourTitles[t].tourNumber,
+                        "TITLES": [newTourTitles[t].TourTitle.TITLE] // Assuming single title for new tours...
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    newTourTitles[t].createdInDB = true; // Mark this tour as created in the DB
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        // if there are new tours, make the create tours button visible and add event listener...
+        let createToursBtn = document.querySelector('#tours-to-create .tours-list button')
+        createToursBtn.style.visibility = "visible"
+        createToursBtn.addEventListener('click', createToursInDB)
+
+    }
+
+}
+
+
+
+
+function actionUpdateVoucherLinks(){
+
+
+    const checkforExistingVouchers = () => {
+
+        document.querySelector('#vouchers-to-update .voucher-list button').removeEventListener('click', checkforExistingVouchers)
+        document.querySelector('#vouchers-to-update .voucher-list button').disabled = true
+
+        let results = document.querySelector('#vouchers-to-update .voucher-list .results')
+
+        let linkPrefix = 'https://voicemap.me/tour/'
+
+        const splitLinks = (link) => {
+            return link.split(linkPrefix)[1].split('?')[0].split('/')
+        }
+
+        existingTourTitles.map((tour) => {
+            if(tour.updateDBLinks) {
+
+                // flip title into URL form
+                let urlActiveTitle = tour.TourTitle.TITLE.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-')
+
+                // flip previous title into URL form
+                let urlPreviousTitle = tour.allTitles[1].toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-')
+
+                // break a current link to {prefix}/{area}/{title}/{voucher}
+                let sampleCsvVoucher = vouchers.find((voucher) => voucher.TOUR == tour.tourNumber)
+                let sampleCsvLinkSplits = splitLinks(sampleCsvVoucher.LINK)
+
+                // get AVAILABLE (not sold) tour vouchers from DB...
+                const getTourVouchersFromDB = async (TOUR) => {
+                    // this function fetches voucher items from the database using a GET request with a TOUR paramenter
+                    try {
+                        const response = await fetch(`/api/vouchers/${TOUR}`);
+                        if (!response.ok) {
+                            throw new Error(`Error fetching vouchers for TOUR ${TOUR}: ${response.statusText}`);
+                        }
+                        const data = await response.json();
+                        console.log(data.vouchers)
+                        return data.vouchers; // Assuming the API returns an object with a 'vouchers' property
+                    } catch (error) {
+                        console.error('Error:', error);
+                        return [];
+                    }
+                }
+                let tourDbVouchers = getTourVouchersFromDB(tour.tourNumber)
+
+                // check to make sure that there were available vouchers returned
+                if(tourDbVouchers.lenght == 0){
+                    results.innerText = "No available tours were found."
+                } else {
+                    let sampleDbLinkSplits = splitLinks(tourDbVouchers[0].LINK)
+
+                    let regionStyle = (sampleCsvLinkSplits[0] == sampleDbLinkSplits[0]) ? 'style="font-weight: bold"' : ''
+
+
+                    results.innerHTML += `<hr /><h3>TOUR #${tour.tourNumber}</h3>`
+                    results.innerHTML += `<p>Active Title:   ${tour.TourTitle.TITLE} | <strong>${urlActiveTitle}</strong></p>`
+                    results.innerHTML += `<p>Previous Title: ${tour.allTitles[1]} | <italic>${urlPreviousTitle}</italic></p>`
+                    results.innerHTML += `<p class="sample-link">CSV SAMPLE LINK: ${linkPrefix}/<span ${regionStyle}>${sampleCsvLinkSplit[0]}</span>/<strong>${sampleCsvLinkSplit[1]}</strong>/?voucher=${sampleCsvVouncher.VOUCHER_ID}</p>`
+                    results.innerHTML += `<p class="sample-link">_DB SAMPLE LINK: ${linkPrefix}/<span ${regionStyle}>${sampleDbLinkSplit[0]}</span>/<strong>${sampleDbLinkSplit[1]}</strong>/?voucher=${tourDbVouchers[0].VOUCHER_ID}</p>`
+                    results.innerHTML += `<p>Number of Vouchers needing this update: ${tourDbVouchers.length}`
+
+                }
+
+
+
+            }
+        })
+
+        document.querySelector('#vouchers-to-update .voucher-list button').innerText = "Update These Vouchers' Links"
+        document.querySelector('#vouchers-to-update .voucher-list button').addEventListener('click', ()=>{
+            console.log("We'll circle back to this one here, okay?")
+        })
+        document.querySelector('#vouchers-to-update .voucher-list button').disabled = false;
+
+
+
+    }
+
+
+
+    // List out the tours that have new Active Titles...
+    let toursList = document.querySelector('#tours-to-update .tours-list ul')
+    
+
+    if(!existingTourTitles.length == 0) {
+        existingTourTitles.map((tour) => {
+            if(tour.updateDBLinks) {
+                toursList.innerHTML += `<li>KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
+            }
+        })
+
+        let updateLinksBtn = document.querySelector('#vouchers-to-update .voucher-list button')
+        updateLinksBtn.addEventListener('click', checkforExistingVouchers(e))
+        updateLinksBtn.style.visibility = "visible";
+
+    } else {
+        toursList.innerText = "No tours have new Active Titles."
+    }
+}
+
+
+
+
+function actionCreateVouchers(){
+
+    const uploadVouchersToDB = () => {
+        // This function would be called to create new vouchers based on the current state of the vouchers array...
+        // This would typically involve sending the vouchers to the backend API to be added to the database.
+
+        console.log("Creating Vouchers in DB...")
+        console.log(vouchers)
+
+        for (let v = 0; v < vouchers.length; v++){
+            fetch('/api/add-voucher', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(vouchers[v])
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                vouchers[v].createdInDB = true; // Mark this voucher as created in the DB
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
     }
 
 }
