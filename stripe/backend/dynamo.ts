@@ -12,9 +12,15 @@ let { PutCommand, GetCommand, QueryCommand, DynamoDBDocumentClient, ScanCommand,
 let credentialProviders = require('@aws-sdk/credential-providers');
 let fromEnv = credentialProviders.fromEnv;
 
+
+// DYNAMODB TOUR TABLE NAMES
+let toursTable = "TOURS"
+let voucherTable = "VM_VOUCHER_CODES"
+
+
 interface Tour {
     TOUR_REGION: string;
-    TOUR: number;
+    TOUR_NUM: number;
     TITLES: string[];
 }
 
@@ -22,10 +28,10 @@ interface Voucher {
     VOUCHER_ID: string;
     TOUR_NUM: number;
     LINK: string;
-    CREATED: Date;
+    CREATED: number;        // new Date().valueOf() == ms as number
     AVAILABLE: Boolean;
     REDEEMED: Boolean;
-    PURCHASED?: Date;
+    PURCHASED?: number;     // new Date().valueOf() == ms as number
     TRANSACTION_ID?: string; // Foreign Key to Transactions Table
 }
 
@@ -39,22 +45,6 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 
 
-const main = async () => {
-    const command = new PutCommand({
-        TableName: "TOURS",
-        Item: {
-            TOUR_ID: "Test5",
-            TOUR: "KBT002",
-            TITLES: ["Bourbon Tour Day 1 of 1", "The Bourbon Tour", "The Kentucky Bourbon Tour"],
-        },
-    });
-
-    const response = await docClient.send(command);
-    console.log("it ran");
-    console.log(response);
-    return response;
-};
-
 
 
 // ****************
@@ -63,11 +53,13 @@ const main = async () => {
 
 
 const createTour = async (tourRegion: string, tourNumber: number, titles: string[]) => {
+    console.log("in dynamo.ts createTour()...")
+    console.log(tourRegion, typeof tourRegion, tourNumber, typeof tourNumber, titles)
     const command = new PutCommand({
-        TableName: "TOURS2",
+        TableName: toursTable,
         Item: {
             TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
-            TOUR: tourNumber, 
+            TOUR_NUM: tourNumber, 
             TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
         },
     });
@@ -82,10 +74,10 @@ const createTour = async (tourRegion: string, tourNumber: number, titles: string
 // Update a tour's TITLES in db...
 const updateTour = async (tourRegion: string, tourNumber: number, titles: string[]) => {
     const command = new UpdateCommand({
-        TableName: "TOURS2",
+        TableName: toursTable,
         Key: {
             TOUR_REGION: tourRegion,
-            TOUR: tourNumber,
+            TOUR_NUM: tourNumber,
         },
         UpdateExpression: "SET TITLES = :titles",
         ExpressionAttributeValues: {
@@ -110,7 +102,7 @@ const updateTour = async (tourRegion: string, tourNumber: number, titles: string
 
 const getTours = async (tourRegion: string = "KBT") => {
     const command = new QueryCommand({
-        TableName: "TOURS2",
+        TableName: toursTable,
         KeyConditionExpression: "TOUR_REGION = :reg",
         ExpressionAttributeValues: {
             ":reg": tourRegion
@@ -125,7 +117,7 @@ const getTours = async (tourRegion: string = "KBT") => {
 
 const scanTours = async () => {
     const command = new ScanCommand({
-        TableName: "TOURS2"
+        TableName: toursTable
     });
 
     const response = await docClient.send(command);
@@ -142,15 +134,15 @@ const scanTours = async () => {
 // Create a new voucher in the VM_VOUCHER_CODES table...
 const createVoucher = async (voucher: Voucher) => {
     const command = new PutCommand({
-        TableName: "VM_VOUCHER_CODES",
+        TableName: voucherTable,
         Item: {
             VOUCHER_ID: voucher.VOUCHER_ID,
             TOUR_NUM: voucher.TOUR_NUM,
             LINK: voucher.LINK,
-            CREATED: voucher.CREATED.toISOString(),
+            CREATED: new Date(voucher.CREATED).valueOf(),   //takes the string, creates Date obj, then outputs ms number
             AVAILABLE: voucher.AVAILABLE, // updated when purchased
             REDEEMED: voucher.REDEEMED,
-            PURCHASED: voucher.PURCHASED ? voucher.PURCHASED.toISOString() : null, // null when first created, updated when purchased
+            PURCHASED: voucher.PURCHASED ? new Date(voucher.PURCHASED).valueOf() : null, // null when first created, updated when purchased
             TRANSACTION_ID: voucher.TRANSACTION_ID || null, // null when first created, updated when purchased
         },
     });
@@ -169,7 +161,7 @@ const createVoucher = async (voucher: Voucher) => {
 // Retreive vouchers by TOUR_NUM that are AVAILABLE...
 const getVouchersByTour = async (tourNum: number) => {
     const command = new QueryCommand({
-        TableName: "VM_VOUCHER_CODES",
+        TableName: voucherTable,
         IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
         KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
         ExpressionAttributeValues: {
@@ -193,7 +185,7 @@ const getVouchersByTour = async (tourNum: number) => {
 // retreive a single voucher by VOUCHER_ID...
 const getVoucherById = async (voucherId: string) => {
     const command = new GetCommand({
-        TableName: "VM_VOUCHER_CODES",
+        TableName: voucherTable,
         Key: {
             VOUCHER_ID: voucherId
         }
@@ -203,11 +195,12 @@ const getVoucherById = async (voucherId: string) => {
         const response = await docClient.send(command);
         if (response.Item) {
             console.log("Voucher retrieved successfully");
-            console.log(response.Item);
+            console.log("from dynamo.ts - ", response.Item);
             return response.Item;
         } else {
             console.log("Voucher not found");
-            return null;
+            // return null;
+            throw new Error;
         }
     } catch (error) {
         console.error("Error retrieving voucher:", error);
@@ -215,12 +208,14 @@ const getVoucherById = async (voucherId: string) => {
     }
 }
 
-// retreive most recently added voucher...
+
+// retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
 const getMostRecentVoucher = async () => {
     const command = new ScanCommand({
         TableName: "VM_VOUCHER_CODES",
-        Limit: 1, // Limit to the most recent one
-        ScanIndexForward: false // Sort in descending order (if using a sort key)
+        IndexName: "CreatedIndex",
+        ScanIndexForward: false,  // This sorts in descending order (newest first)
+        Limit: 1  // This gets only the first (newest) item    
     });
 
     try {
@@ -239,10 +234,12 @@ const getMostRecentVoucher = async () => {
     }
 }
 
+
+
 // this function updates a voucher's LINK field in the VM_VOUCHER_CODES table...
 const updateVoucherLink = async (voucherId: string, newLink: string) => {
     const command = new UpdateCommand({
-        TableName: "VM_VOUCHER_CODES",
+        TableName: voucherTable,
         Key: {
             VOUCHER_ID: voucherId,
         },
@@ -263,6 +260,7 @@ const updateVoucherLink = async (voucherId: string, newLink: string) => {
         throw error;
     }
 };
+
 
 
 

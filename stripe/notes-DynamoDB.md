@@ -15,14 +15,13 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/getting-started
 
 TABLE: VM_VOUCHER_CODES
  - VOUCHER_ID: Str PARTITION KEY
- - TOUR_ID: Str  SORT KEY // Foreign Key
- - ///  CODE: - no need for this, the VOUCHER_ID is the code
+ - TOUR_NUM: Number   // Foreign key to TOURS table + GSI
  - LINK: str
  - AVAILABLE: Boolean
- - REDEEMED: Boolean // NEW!
- - CREATED: Date()
- - PURCHASED: Date()
- - TRANSACTION_ID: Str / Foreign Key
+ - REDEEMED: Boolean  // NEW!
+ - CREATED: Number    // ms value of Date().valueOf()
+ - PURCHASED: Number  // same ms value
+ - TRANSACTION_ID: Str / Foreign Key to TRANSACTIONS table + GSI
 
 
 

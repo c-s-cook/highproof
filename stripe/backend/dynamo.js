@@ -1,373 +1,220 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-var _this = this;
 // import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-var clientDynamodb = require('@aws-sdk/client-dynamodb');
-var DynamoDBClient = clientDynamodb.DynamoDBClient;
+let clientDynamodb = require('@aws-sdk/client-dynamodb');
+let DynamoDBClient = clientDynamodb.DynamoDBClient;
 // import { PutCommand, GetCommand, QueryCommand, DynamoDBDocumentClient, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-var libDynamodb = require('@aws-sdk/lib-dynamodb');
-var PutCommand = libDynamodb.PutCommand, GetCommand = libDynamodb.GetCommand, QueryCommand = libDynamodb.QueryCommand, DynamoDBDocumentClient = libDynamodb.DynamoDBDocumentClient, ScanCommand = libDynamodb.ScanCommand, UpdateCommand = libDynamodb.UpdateCommand;
+let libDynamodb = require('@aws-sdk/lib-dynamodb');
+let { PutCommand, GetCommand, QueryCommand, DynamoDBDocumentClient, ScanCommand, UpdateCommand } = libDynamodb;
 // import { fromEnv } from "@aws-sdk/credential-providers";
-var credentialProviders = require('@aws-sdk/credential-providers');
-var fromEnv = credentialProviders.fromEnv;
-var client = new DynamoDBClient({
+let credentialProviders = require('@aws-sdk/credential-providers');
+let fromEnv = credentialProviders.fromEnv;
+// DYNAMODB TOUR TABLE NAMES
+let toursTable = "TOURS";
+let voucherTable = "VM_VOUCHER_CODES";
+const client = new DynamoDBClient({
     credentials: fromEnv(),
     region: "us-east-2"
 });
-var docClient = DynamoDBDocumentClient.from(client);
-var main = function () { return __awaiter(_this, void 0, void 0, function () {
-    var command, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new PutCommand({
-                    TableName: "TOURS",
-                    Item: {
-                        TOUR_ID: "Test5",
-                        TOUR: "KBT002",
-                        TITLES: ["Bourbon Tour Day 1 of 1", "The Bourbon Tour", "The Kentucky Bourbon Tour"],
-                    },
-                });
-                return [4 /*yield*/, docClient.send(command)];
-            case 1:
-                response = _a.sent();
-                console.log("it ran");
-                console.log(response);
-                return [2 /*return*/, response];
-        }
-    });
-}); };
+const docClient = DynamoDBDocumentClient.from(client);
 // ****************
 //  TOUR MANAGEMENT
 // ****************
-var createTour = function (tourRegion, tourNumber, titles) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new PutCommand({
-                    TableName: "TOURS2",
-                    Item: {
-                        TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
-                        TOUR: tourNumber,
-                        TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
-                    },
-                });
-                return [4 /*yield*/, docClient.send(command)];
-            case 1:
-                response = _a.sent();
-                console.log("it added");
-                console.log(response);
-                return [2 /*return*/, response];
-        }
+const createTour = async (tourRegion, tourNumber, titles) => {
+    console.log("in dynamo.ts createTour()...");
+    console.log(tourRegion, typeof tourRegion, tourNumber, typeof tourNumber, titles);
+    const command = new PutCommand({
+        TableName: toursTable,
+        Item: {
+            TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
+            TOUR_NUM: tourNumber,
+            TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
+        },
     });
-}); };
-// Update a tour's TITLES in db...
-var updateTour = function (tourRegion, tourNumber, titles) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new UpdateCommand({
-                    TableName: "TOURS2",
-                    Key: {
-                        TOUR_REGION: tourRegion,
-                        TOUR: tourNumber,
-                    },
-                    UpdateExpression: "SET TITLES = :titles",
-                    ExpressionAttributeValues: {
-                        ":titles": titles,
-                    },
-                    ReturnValues: "ALL_NEW", // Returns the updated item
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                console.log("Tour updated successfully");
-                console.log(response);
-                return [2 /*return*/, response];
-            case 3:
-                error_1 = _a.sent();
-                console.error("Error updating tour:", error_1);
-                throw error_1;
-            case 4: return [2 /*return*/];
-        }
-    });
-}); };
-var getTours = function () {
-    var args_1 = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        args_1[_i] = arguments[_i];
-    }
-    return __awaiter(_this, __spreadArray([], args_1, true), void 0, function (tourRegion) {
-        var command, response;
-        if (tourRegion === void 0) { tourRegion = "KBT"; }
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    command = new QueryCommand({
-                        TableName: "TOURS2",
-                        KeyConditionExpression: "TOUR_REGION = :reg",
-                        ExpressionAttributeValues: {
-                            ":reg": tourRegion
-                        }
-                    });
-                    return [4 /*yield*/, docClient.send(command)];
-                case 1:
-                    response = _a.sent();
-                    // console.log(response);
-                    return [2 /*return*/, response];
-            }
-        });
-    });
+    const response = await docClient.send(command);
+    console.log("it added");
+    console.log(response);
+    return response;
 };
-var scanTours = function () { return __awaiter(_this, void 0, void 0, function () {
-    var command, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new ScanCommand({
-                    TableName: "TOURS2"
-                });
-                return [4 /*yield*/, docClient.send(command)];
-            case 1:
-                response = _a.sent();
-                console.log("tried scanning...");
-                console.log(response.Items);
-                return [2 /*return*/, response];
+// Update a tour's TITLES in db...
+const updateTour = async (tourRegion, tourNumber, titles) => {
+    const command = new UpdateCommand({
+        TableName: toursTable,
+        Key: {
+            TOUR_REGION: tourRegion,
+            TOUR_NUM: tourNumber,
+        },
+        UpdateExpression: "SET TITLES = :titles",
+        ExpressionAttributeValues: {
+            ":titles": titles,
+        },
+        ReturnValues: "ALL_NEW", // Returns the updated item
+    });
+    try {
+        const response = await docClient.send(command);
+        console.log("Tour updated successfully");
+        console.log(response);
+        return response;
+    }
+    catch (error) {
+        console.error("Error updating tour:", error);
+        throw error;
+    }
+};
+const getTours = async (tourRegion = "KBT") => {
+    const command = new QueryCommand({
+        TableName: toursTable,
+        KeyConditionExpression: "TOUR_REGION = :reg",
+        ExpressionAttributeValues: {
+            ":reg": tourRegion
         }
     });
-}); };
+    const response = await docClient.send(command);
+    // console.log(response);
+    return response;
+};
+const scanTours = async () => {
+    const command = new ScanCommand({
+        TableName: toursTable
+    });
+    const response = await docClient.send(command);
+    console.log("tried scanning...");
+    console.log(response.Items);
+    return response;
+};
 // *******************
 //  VOUCHER MANAGEMENT
 // *******************
 // Create a new voucher in the VM_VOUCHER_CODES table...
-var createVoucher = function (voucher) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new PutCommand({
-                    TableName: "VM_VOUCHER_CODES",
-                    Item: {
-                        VOUCHER_ID: voucher.VOUCHER_ID,
-                        TOUR_NUM: voucher.TOUR_NUM,
-                        LINK: voucher.LINK,
-                        CREATED: voucher.CREATED.toISOString(),
-                        AVAILABLE: voucher.AVAILABLE, // updated when purchased
-                        REDEEMED: voucher.REDEEMED,
-                        PURCHASED: voucher.PURCHASED ? voucher.PURCHASED.toISOString() : null, // null when first created, updated when purchased
-                        TRANSACTION_ID: voucher.TRANSACTION_ID || null, // null when first created, updated when purchased
-                    },
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                console.log("Voucher created successfully");
-                console.log(response);
-                return [2 /*return*/, response];
-            case 3:
-                error_2 = _a.sent();
-                console.error("Error creating voucher:", error_2);
-                throw error_2;
-            case 4: return [2 /*return*/];
-        }
+const createVoucher = async (voucher) => {
+    const command = new PutCommand({
+        TableName: voucherTable,
+        Item: {
+            VOUCHER_ID: voucher.VOUCHER_ID,
+            TOUR_NUM: voucher.TOUR_NUM,
+            LINK: voucher.LINK,
+            CREATED: new Date(voucher.CREATED).valueOf(), //takes the string, creates Date obj, then outputs ms number
+            AVAILABLE: voucher.AVAILABLE, // updated when purchased
+            REDEEMED: voucher.REDEEMED,
+            PURCHASED: voucher.PURCHASED ? new Date(voucher.PURCHASED).valueOf() : null, // null when first created, updated when purchased
+            TRANSACTION_ID: voucher.TRANSACTION_ID || null, // null when first created, updated when purchased
+        },
     });
-}); };
-// Retreive vouchers by TOUR_NUM that are AVAILABLE...
-var getVouchersByTour = function (tourNum) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_3;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new QueryCommand({
-                    TableName: "VM_VOUCHER_CODES",
-                    IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
-                    KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
-                    ExpressionAttributeValues: {
-                        ":tourNum": tourNum,
-                        ":available": true,
-                    },
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                console.log("Vouchers retrieved successfully");
-                console.log(response.Items);
-                return [2 /*return*/, response.Items];
-            case 3:
-                error_3 = _a.sent();
-                console.error("Error retrieving vouchers:", error_3);
-                throw error_3;
-            case 4: return [2 /*return*/];
-        }
-    });
-}); };
-// retreive a single voucher by VOUCHER_ID...
-var getVoucherById = function (voucherId) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_4;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new GetCommand({
-                    TableName: "VM_VOUCHER_CODES",
-                    Key: {
-                        VOUCHER_ID: voucherId
-                    }
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                if (response.Item) {
-                    console.log("Voucher retrieved successfully");
-                    console.log(response.Item);
-                    return [2 /*return*/, response.Item];
-                }
-                else {
-                    console.log("Voucher not found");
-                    return [2 /*return*/, null];
-                }
-                return [3 /*break*/, 4];
-            case 3:
-                error_4 = _a.sent();
-                console.error("Error retrieving voucher:", error_4);
-                throw error_4;
-            case 4: return [2 /*return*/];
-        }
-    });
-}); };
-// retreive most recently added voucher...
-var getMostRecentVoucher = function () { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_5;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new ScanCommand({
-                    TableName: "VM_VOUCHER_CODES",
-                    Limit: 1, // Limit to the most recent one
-                    ScanIndexForward: false // Sort in descending order (if using a sort key)
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                if (response.Items && response.Items.length > 0) {
-                    console.log("Most recent voucher retrieved successfully");
-                    console.log(response.Items[0]);
-                    return [2 /*return*/, response.Items[0]];
-                }
-                else {
-                    console.log("No vouchers found");
-                    return [2 /*return*/, null];
-                }
-                return [3 /*break*/, 4];
-            case 3:
-                error_5 = _a.sent();
-                console.error("Error retrieving most recent voucher:", error_5);
-                throw error_5;
-            case 4: return [2 /*return*/];
-        }
-    });
-}); };
-// this function updates a voucher's LINK field in the VM_VOUCHER_CODES table...
-var updateVoucherLink = function (voucherId, newLink) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_6;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                command = new UpdateCommand({
-                    TableName: "VM_VOUCHER_CODES",
-                    Key: {
-                        VOUCHER_ID: voucherId,
-                    },
-                    UpdateExpression: "SET LINK = :newLink",
-                    ExpressionAttributeValues: {
-                        ":newLink": newLink,
-                    },
-                    ReturnValues: "ALL_NEW", // Returns the updated item
-                });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, docClient.send(command)];
-            case 2:
-                response = _a.sent();
-                console.log("Voucher link updated successfully");
-                console.log(response);
-                return [2 /*return*/, response];
-            case 3:
-                error_6 = _a.sent();
-                console.error("Error updating voucher link:", error_6);
-                throw error_6;
-            case 4: return [2 /*return*/];
-        }
-    });
-}); };
-module.exports = {
-    createTour: createTour,
-    scanTours: scanTours,
-    getTours: getTours,
-    updateTour: updateTour,
-    createVoucher: createVoucher,
-    getVouchersByTour: getVouchersByTour,
-    getVoucherById: getVoucherById,
-    getMostRecentVoucher: getMostRecentVoucher,
-    updateVoucherLink: updateVoucherLink
+    try {
+        const response = await docClient.send(command);
+        console.log("Voucher created successfully");
+        console.log(response);
+        return response;
+    }
+    catch (error) {
+        console.error("Error creating voucher:", error);
+        throw error;
+    }
 };
+// Retreive vouchers by TOUR_NUM that are AVAILABLE...
+const getVouchersByTour = async (tourNum) => {
+    const command = new QueryCommand({
+        TableName: voucherTable,
+        IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
+        KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
+        ExpressionAttributeValues: {
+            ":tourNum": tourNum,
+            ":available": true,
+        },
+    });
+    try {
+        const response = await docClient.send(command);
+        console.log("Vouchers retrieved successfully");
+        console.log(response.Items);
+        return response.Items;
+    }
+    catch (error) {
+        console.error("Error retrieving vouchers:", error);
+        throw error;
+    }
+};
+// retreive a single voucher by VOUCHER_ID...
+const getVoucherById = async (voucherId) => {
+    const command = new GetCommand({
+        TableName: voucherTable,
+        Key: {
+            VOUCHER_ID: voucherId
+        }
+    });
+    try {
+        const response = await docClient.send(command);
+        if (response.Item) {
+            console.log("Voucher retrieved successfully");
+            console.log("from dynamo.ts - ", response.Item);
+            return response.Item;
+        }
+        else {
+            console.log("Voucher not found");
+            // return null;
+            throw new Error;
+        }
+    }
+    catch (error) {
+        console.error("Error retrieving voucher:", error);
+        throw error;
+    }
+};
+// retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
+const getMostRecentVoucher = async () => {
+    const command = new ScanCommand({
+        TableName: "VM_VOUCHER_CODES",
+        IndexName: "CreatedIndex",
+        ScanIndexForward: false, // This sorts in descending order (newest first)
+        Limit: 1 // This gets only the first (newest) item    
+    });
+    try {
+        const response = await docClient.send(command);
+        if (response.Items && response.Items.length > 0) {
+            console.log("Most recent voucher retrieved successfully");
+            console.log(response.Items[0]);
+            return response.Items[0];
+        }
+        else {
+            console.log("No vouchers found");
+            return null;
+        }
+    }
+    catch (error) {
+        console.error("Error retrieving most recent voucher:", error);
+        throw error;
+    }
+};
+// this function updates a voucher's LINK field in the VM_VOUCHER_CODES table...
+const updateVoucherLink = async (voucherId, newLink) => {
+    const command = new UpdateCommand({
+        TableName: voucherTable,
+        Key: {
+            VOUCHER_ID: voucherId,
+        },
+        UpdateExpression: "SET LINK = :newLink",
+        ExpressionAttributeValues: {
+            ":newLink": newLink,
+        },
+        ReturnValues: "ALL_NEW", // Returns the updated item
+    });
+    try {
+        const response = await docClient.send(command);
+        console.log("Voucher link updated successfully");
+        console.log(response);
+        return response;
+    }
+    catch (error) {
+        console.error("Error updating voucher link:", error);
+        throw error;
+    }
+};
+module.exports = {
+    createTour,
+    scanTours,
+    getTours,
+    updateTour,
+    createVoucher,
+    getVouchersByTour,
+    getVoucherById,
+    getMostRecentVoucher,
+    updateVoucherLink
+};
+//# sourceMappingURL=dynamo.js.map
