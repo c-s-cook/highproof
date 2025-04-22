@@ -1,0 +1,42 @@
+.tour-listing:hover img {
+    transform: scale(1.1);
+    transition: 0.5s ease-in-out;
+    transform-origin: ;
+}
+
+
+
+.tour-listing-location-tags {
+    margin-top: 1.5em;
+    margin-bottom: 0;
+    padding-top: 2em;
+    line-height: 1.1em;
+}
+
+.tour-listing-location-tags div {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    display: inline;
+}
+.tour-listing-location-tags div::before {
+    content: "FEATURED LOCATIONS:";
+    font-weight: 800;
+    text-align: left;
+    display: block;
+}
+
+.tour-listing-location-tags div p {
+    display: inline;
+    padding-right: 0.5em;
+    margin: 0px;
+    padding-left: 0px;
+}
+.tour-listing-location-tags div p, .tour-listing-location-tags div::before, .tour-listing-location-tags div {
+    text-align: left;
+    
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-bottom: 0;
+    padding-bottom: 0;
+    line-height: 1.2em;
+}

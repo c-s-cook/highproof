@@ -1,0 +1,78 @@
+#tour-comparison {
+    padding: 2em;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    
+}
+
+#tour-comparison h2 {
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    background-color: bisque;
+    padding: 10px;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+
+#tour-comparison .table{
+    display: flex;
+    box-sizing: border-box;
+    justify-content: center;
+    width: 100%;
+    /* border: 1px solid gray; */
+}
+
+#tour-comparison .table div div {
+    height: 4.5em;
+    max-height: 4.5em;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    padding: 0px 1.5em;
+    width: 100%;
+    border: 1px solid gray;
+    background-color: azure;
+    box-sizing: border-box;
+}
+
+#tour-comparison .table .titles div {
+    text-align: right;
+    font-weight: bolder;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    justify-content: flex-end;
+    background-color: rgb(163, 209, 209);
+
+}
+
+
+
+/* #tour-comparison .table div div p {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    
+    transform: translateY(-50%);
+    top: 50%;
+    margin: auto;
+    background-color: rgb(226, 140, 140);
+} */
+
+#tour-comparison .table div div:first-of-type {
+    color: blue;
+    text-transform: none;
+    text-decoration: underline;
+    font-weight: 800;
+    background-color: antiquewhite;
+}
+
+#tour-comparison .none {
+    color: red;
+    font-weight: bolder;
+
+}
