@@ -1,0 +1,310 @@
+
+h1, h2 {
+    text-align: center;
+}
+
+div#input {
+    text-align: center;
+}
+div#input input[type="file"]{
+    padding-left: 1em;
+}
+
+
+
+
+/**** TOUR TITLE STYLING ****/
+
+.tour-title-list {
+    display: block;
+    height: 2em;
+}
+.tour-title-list:hover{
+    background-color: rgb(232, 232, 232);
+}
+
+.tour-title-list .title {
+    display: inline-block;
+    width: 40%;
+    font-weight: bolder;
+
+}
+.tour-title-list .count{
+    display: inline-block;
+    padding: 0 2em;
+    border-left: 2px solid gray;
+}
+.tour-title-list .buttons{
+    display: inline-block;
+}
+
+
+
+
+
+
+/**** POP-UP STYLING ****/
+
+
+#pop-up-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 90;
+}
+
+#pop-up {
+    z-index: 99;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    max-width: 90vw;
+    max-height: 90vh;
+    border: 2px solid orangered;
+    border-radius: 10px;
+    background-color: blanchedalmond;
+}
+
+#pop-up #close-pop-up {
+    margin: 1em;
+    width: 2em;
+    height: 2em;
+    align-content: center;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bolder;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.753);
+    color: white;
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    cursor: pointer;
+}
+
+
+#pop-up-content {
+    padding: 2em;
+}
+
+.menu-tours-list {
+    display: flex;
+    justify-content: flex-start;
+    align-items:baseline;
+    border-bottom: 1px solid lightgray;
+}
+
+.menu-tours-list:hover {
+    background-color: rgba(70, 70, 70, 0.25);
+}
+
+
+
+.menu-tours-list > p:first-child {
+    width: 15%;
+    text-align: center;
+}
+
+/* .menu-tours-list:nth-of-type(2) {
+    background-color: rgba(70, 70, 70, 0.25);
+} */
+
+
+
+/* RESULTS TOUR LISTS */
+
+
+#title-results  #existing-tours  .alt-titles {
+    padding-left: 2em;
+    margin-left: 2em;
+    padding-top: 0;
+    margin-top: -0.5em;
+}
+
+#title-results {
+    border: 1px solid gray;
+    padding: 2em;
+}
+
+#title-results h3 {
+    margin-bottom: -0.5em;
+}
+
+#title-results>div:last-of-type {
+    margin-top: 3em;
+}
+
+#title-results .alt-titles {
+    padding-left: 4em;
+    font-style: italic;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+
+
+
+
+#existing-tour-false {
+    text-align: center;
+}
+
+#existing-tour-false>input[type="text"]{
+    width: 90%;
+}
+
+#existing-tour-false>#error{
+    font-size: small;
+}
+
+#existing-tour-false>#error>.error{
+    color: red;
+}
+
+#existing-tour-false>#error>.warning{
+    color: orange;
+}
+
+
+
+
+/* VOUCHER RESULTS TABLE */
+
+#voucher-results{
+    margin-top: 5em;
+}
+
+#voucher-table{
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#voucher-table td, #voucher-table th, #voucher-table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+
+}
+
+#voucher-table td {
+    margin: 0px;
+    padding: 0.5em;
+}
+
+#voucher-table tr {
+    padding: 10px 5px;
+    margin: 0px;
+}
+
+#voucher-table th:first-of-type{
+    border: none;
+}
+
+
+
+/* DATABASE STATUS OF VOUCHERS */
+#voucher-table .status{
+    width: 2em;
+    max-width: 2em;
+    padding: 0em;
+    border: 0px transparent solid;
+}
+.confirmed-in-database:before{
+    content: "\2738";  /*heavy 8-point star*/
+    font-size: 1.5em;
+    color: rgb(0, 149, 255);
+}
+
+.likely-in-database:before{
+    content: "\2738";  /*heavy 8-point star*/
+    font-size: 1.5em;
+    color: blueviolet;
+}
+
+#voucher-table .uploaded-successfully:before{
+    content: "\2705";  /*green-box with big white check*/
+    font-size: 1.25em;
+}
+
+#voucher-table .upload-error:before{
+    content: "\274C";  /*red cross-mark*/
+    font-size: 1.25em;
+}
+
+
+
+
+
+
+#voucher-table tr:nth-of-type(even){
+    background-color: rgb(201, 201, 201);
+}
+
+#voucher-table .voucher-th{
+    border-bottom: 2px black;
+    border-right: 1px solid gray;
+}
+
+#voucher-table .title, #voucher-table .link{
+    text-align: left;
+}
+
+#voucher-table .link{
+    overflow: hidden;
+}
+
+#voucher-table .updated-title{
+    
+    background-color: rgb(255, 186, 112);
+}
+
+#voucher-table .new-tour{
+    background-color: teal;
+}
+
+
+
+/**** ACTION ITEMS ****/
+
+#action-items{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 2em;
+    margin-top: 4em;
+}
+
+#action-items>h2{
+    width: 100%;
+    text-align: center;
+}
+
+#action-items>div{
+    width: 45%;
+    min-width: 300px;
+    border: 1px solid gray;
+    min-height: 100px;
+    padding: 2em;
+}
+
+#action-items>div>h3{
+    margin-bottom: 0px;
+}
+
+#action-items>div>p:first-of-type{
+    margin-top: 0px;
+
+}
+
+#vouchers-to-update .voucher-list .results>div {
+    display: flex;
+}
+
+#vouchers-to-update .voucher-list .results .sample-link {
+    font-size: small;
+}

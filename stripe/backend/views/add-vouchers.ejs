@@ -1,0 +1,162 @@
+<%- include('partials/header'); -%>
+
+
+    <h1><%= title %></h1>
+    
+    <div id="admin-options">
+      <div id="input">
+        <p>Select CSV File: <input type="file" id="fileInput" accept=".csv" /></p>
+      </div>
+
+
+
+      <div id="title-results" style="display: none;">
+        <h2>TOUR TITLE RESULTS</h2>
+        <div>
+          <h3>EXISTING TOURS:</h3>
+          <p>Found vouchers for the following, exisiting tour(s):</p>
+          <div id="existing-tours"></div>
+        </div>
+        <div>
+          <h3>NEW TOURS:</h3>
+          <p>These are the new tours that aren't connected to any existing tour(s):</p>
+          <div id="new-tours"></div>
+        </div>
+      </div>
+
+      <!-- VOUCHER TABLE -->
+      <div id="voucher-results" style="display: block;">
+        <h2>VOUCHERS</h2>
+        <pre id="output"></pre>
+        <table id="voucher-table">
+          <thead>
+            <tr>
+              <th class="voucher-th status"></th>
+              <th class="voucher-th id">ID</th>
+              <th class="voucher-th tour-id">TOUR</th>
+              <th class="voucher-th title">TITLE</th>
+              <th class="voucher-th redeemed">REDEEMED</th>
+              <th class="voucher-th available">AVAILABLE</th>
+              <th class="voucher-th link">LINK</th>
+              <th class="voucher-th created">CREATED</th>
+            </tr>
+          </thead>
+          <tbody id="voucher-body">
+
+          </tbody>
+        </table>
+      </div>
+      <!-- END   POP-UP -->
+
+
+      <!-- ACTION ITEMS -->
+      <div id="action-items" style="display: none;">
+        <h2>ACTION ITEMS</h2>
+        <div id="tours-to-update">
+          <h3>UPDATE TOURS:</h3>
+          <p>Looks like we need to update the Active Title (and therefore also the links?) for the following tours:</p>
+          <div class="tours-list">
+            <table>
+              <tbody style="visibility: hidden;">
+                <tr>
+                  <th>FROM:</th>
+                  <th>TO:</th>
+                </tr>
+              </tbody>
+            </table>
+            <button style="visibility: hidden;">Update These Tours</button>
+          </div>
+        </div>
+
+        <div id="tours-to-create">
+          <h3>CREATE NEW TOURS:</h3>
+          <p>The following new tours will be added to the database:</p>
+          <div class="tours-list">
+            <ul>
+              
+            </ul>
+            <button style="visibility: hidden;">Create These Tours</button>
+          </div>
+        </div>
+
+        <div id="vouchers-to-update">
+          <h3>UPDATE VOUCHERS:</h3>
+          <p>Because the following tours have a new Active Title, any previously uploaded vouchers likely need their link updated.</p>
+          <div class="voucher-list"><ul></ul>
+            <button style="visibility: hidden;">Check a Voucher</button>
+            <div class="results"></div>
+          </div>
+        </div>
+
+        <div id="vouchers-to-upload">
+          <h3>UPLOAD VOUCHERS:</h3>
+          <div class="check-db">
+            <p>First, check to see if any of these current vouchers are already in the database.</p>
+            <p class="results" style="visibility: hidden;"></p>
+            <button>Check Database</button>
+          </div>
+
+          <div class="how-to-proceed" style="display:none">
+            <p>Looks like we found some existing vouchers in the database. They're labelled as follows:</p>
+            <p class="confirmed-in-database"> = That exact voucher code has been found in the database</p>
+            <p class="likely-in-database"> = Since its' date is earlier, these vouchers are most likley already in the database.</p>
+            <p>How would you like to proceed?</p>
+            <p><button class="proceed">Proceed as Marked</button> Upload the vouchers, ignoring those confirmed / likely in the database.</p>
+            <p><button class="check">Check Assumptions</button> Confirm that those vouchers marked as Likely are really in the database.</p>
+            <p><button class="deep-check">Deep Check</button> Check every voucher in this CSV against vouchers in database.</p>
+            
+          </div>
+
+          <div class="upload-to-db" style="display:none">
+            <p>Okay. Nothing left to do now but finally upload these new vouchers!</p>
+            <p class="results" style="visibility: hidden;"></p>
+            <button>Upload Vouchers</button>
+          </div>
+
+
+        </div>
+
+      </div>
+      <!-- END   ACTION ITEMS -->
+
+
+
+      <!-- POP-UP -->
+      <div id="pop-up-bg" class="pop-up" style="display: none;"></div>
+      
+      <div id="pop-up" class="pop-up" style="display: none;">
+        <p id="close-pop-up">&#9747</p>
+        <div id="pop-up-content">
+
+          <div id="new-tour-false" style="display: none;">
+            <p>Is the text below a <i>new title</i> for an an existing tour?</p>
+            <p id="ntf-title"></p>
+            <p>If so, what tour / old title is it replacing?</p>
+            <div id="ntf-existing-tours-list"></div>
+          </div>
+
+          <div id="existing-tour-false" style="display: none;">
+            <input type="text">
+            <p id="error"></p>
+            <button>Submit</button>
+          </div>
+
+        </div>
+      </div> 
+      <!-- END  POP-UP -->
+
+    
+
+      
+
+      
+      
+      <link rel='stylesheet' href='/stylesheets/add-vouchers.css' />
+      <script defer src="../javascripts/add-vouchers.js"></script>
+
+
+
+      
+    </div>
+
+<%- include('partials/footer'); -%>
