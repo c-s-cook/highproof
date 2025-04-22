@@ -44,7 +44,7 @@ TABLE:  TOURS
 
 
   TABLE: TRANSATIONS
-   - TRANSATION_ID: Str (Stripe event ID) PARTITION KEY
+   - TRANSATION_ID: Str (Stripe Checkout.session ID) PARTITION KEY
    - CUSTOMER: Str / Foreign Key
    - VOUCHER_IDS: {}
    - Date: Date()
