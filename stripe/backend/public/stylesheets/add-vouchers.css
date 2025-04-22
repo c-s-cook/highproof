@@ -1,4 +1,50 @@
 
+h1, h2 {
+    text-align: center;
+}
+
+div#input {
+    text-align: center;
+}
+div#input input[type="file"]{
+    padding-left: 1em;
+}
+
+
+
+
+/**** TOUR TITLE STYLING ****/
+
+.tour-title-list {
+    display: block;
+    height: 2em;
+}
+.tour-title-list:hover{
+    background-color: rgb(232, 232, 232);
+}
+
+.tour-title-list .title {
+    display: inline-block;
+    width: 40%;
+    font-weight: bolder;
+
+}
+.tour-title-list .count{
+    display: inline-block;
+    padding: 0 2em;
+    border-left: 2px solid gray;
+}
+.tour-title-list .buttons{
+    display: inline-block;
+}
+
+
+
+
+
+
+/**** POP-UP STYLING ****/
+
 
 #pop-up-bg {
     position: absolute;
@@ -125,6 +171,8 @@
 }
 
 
+
+
 /* VOUCHER RESULTS TABLE */
 
 #voucher-results{
@@ -150,8 +198,47 @@
 #voucher-table tr {
     padding: 10px 5px;
     margin: 0px;
-
 }
+
+#voucher-table th:first-of-type{
+    border: none;
+}
+
+
+
+/* DATABASE STATUS OF VOUCHERS */
+#voucher-table .status{
+    width: 2em;
+    max-width: 2em;
+    padding: 0em;
+    border: 0px transparent solid;
+}
+.confirmed-in-database:before{
+    content: "\2738";  /*heavy 8-point star*/
+    font-size: 1.5em;
+    color: rgb(0, 149, 255);
+}
+
+.likely-in-database:before{
+    content: "\2738";  /*heavy 8-point star*/
+    font-size: 1.5em;
+    color: blueviolet;
+}
+
+#voucher-table .uploaded-successfully:before{
+    content: "\2705";  /*green-box with big white check*/
+    font-size: 1.25em;
+}
+
+#voucher-table .upload-error:before{
+    content: "\274C";  /*red cross-mark*/
+    font-size: 1.25em;
+}
+
+
+
+
+
 
 #voucher-table tr:nth-of-type(even){
     background-color: rgb(201, 201, 201);
@@ -179,7 +266,10 @@
     background-color: teal;
 }
 
-/* ACTION ITEMS */
+
+
+/**** ACTION ITEMS ****/
+
 #action-items{
     display: flex;
     flex-wrap: wrap;
@@ -198,7 +288,7 @@
     width: 45%;
     min-width: 300px;
     border: 1px solid gray;
-    min-height: 300px;
+    min-height: 100px;
     padding: 2em;
 }
 
@@ -209,4 +299,12 @@
 #action-items>div>p:first-of-type{
     margin-top: 0px;
 
+}
+
+#vouchers-to-update .voucher-list .results>div {
+    display: flex;
+}
+
+#vouchers-to-update .voucher-list .results .sample-link {
+    font-size: small;
 }

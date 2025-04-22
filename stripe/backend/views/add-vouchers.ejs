@@ -2,12 +2,10 @@
 
 
     <h1><%= title %></h1>
-    <p>And now we add more vouchers...</p>
+    
     <div id="admin-options">
       <div id="input">
-        <button>Select CSV File</button>
-
-        <input type="file" id="fileInput" accept=".csv" />
+        <p>Select CSV File: <input type="file" id="fileInput" accept=".csv" /></p>
       </div>
 
 
@@ -28,10 +26,12 @@
 
       <!-- VOUCHER TABLE -->
       <div id="voucher-results" style="display: block;">
-        <h3>VOUCHERS:</h3>
+        <h2>VOUCHERS</h2>
+        <pre id="output"></pre>
         <table id="voucher-table">
           <thead>
             <tr>
+              <th class="voucher-th status"></th>
               <th class="voucher-th id">ID</th>
               <th class="voucher-th tour-id">TOUR</th>
               <th class="voucher-th title">TITLE</th>
@@ -51,7 +51,7 @@
 
       <!-- ACTION ITEMS -->
       <div id="action-items" style="display: none;">
-        <h2>ACTION ITEMS:</h2>
+        <h2>ACTION ITEMS</h2>
         <div id="tours-to-update">
           <h3>UPDATE TOURS:</h3>
           <p>Looks like we need to update the Active Title (and therefore also the links?) for the following tours:</p>
@@ -64,6 +64,7 @@
                 </tr>
               </tbody>
             </table>
+            <button style="visibility: hidden;">Update These Tours</button>
           </div>
         </div>
 
@@ -74,31 +75,42 @@
             <ul>
               
             </ul>
-
+            <button style="visibility: hidden;">Create These Tours</button>
           </div>
         </div>
 
         <div id="vouchers-to-update">
           <h3>UPDATE VOUCHERS:</h3>
           <p>Because the following tours have a new Active Title, any previously uploaded vouchers likely need their link updated.</p>
-          <div class="voucher-list">
-            <p class="results" style="visibility: hidden;"></p>
-            <button id="check-db-vouchers">Check Vouchers</button>
+          <div class="voucher-list"><ul></ul>
+            <button style="visibility: hidden;">Check a Voucher</button>
+            <div class="results"></div>
           </div>
         </div>
 
         <div id="vouchers-to-upload">
           <h3>UPLOAD VOUCHERS:</h3>
-          <p>First, check to see if any of these current vouchers are already in the database.</p>
           <div class="check-db">
+            <p>First, check to see if any of these current vouchers are already in the database.</p>
             <p class="results" style="visibility: hidden;"></p>
-            <button class="check-existing-vouchers">Check Database</button>
+            <button>Check Database</button>
           </div>
 
-          <div class="upload-to-db">
+          <div class="how-to-proceed" style="display:none">
+            <p>Looks like we found some existing vouchers in the database. They're labelled as follows:</p>
+            <p class="confirmed-in-database"> = That exact voucher code has been found in the database</p>
+            <p class="likely-in-database"> = Since its' date is earlier, these vouchers are most likley already in the database.</p>
+            <p>How would you like to proceed?</p>
+            <p><button class="proceed">Proceed as Marked</button> Upload the vouchers, ignoring those confirmed / likely in the database.</p>
+            <p><button class="check">Check Assumptions</button> Confirm that those vouchers marked as Likely are really in the database.</p>
+            <p><button class="deep-check">Deep Check</button> Check every voucher in this CSV against vouchers in database.</p>
+            
+          </div>
+
+          <div class="upload-to-db" style="display:none">
             <p>Okay. Nothing left to do now but finally upload these new vouchers!</p>
             <p class="results" style="visibility: hidden;"></p>
-            <button class="upload-vouchers">Upload Vouchers</button>
+            <button>Upload Vouchers</button>
           </div>
 
 
@@ -137,7 +149,7 @@
 
       
 
-      <pre id="output"></pre>
+      
       
       <link rel='stylesheet' href='/stylesheets/add-vouchers.css' />
       <script defer src="../javascripts/add-vouchers.js"></script>
