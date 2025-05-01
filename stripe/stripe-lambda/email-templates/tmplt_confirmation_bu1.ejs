@@ -1,0 +1,189 @@
+<%# Expected Data
+    {
+        "logoSrc": string - URL to the logo image,
+        "name": string - Name of the recipient,
+        "tourTitle": string - Title of the tour,
+        "vouchers": Array of Vouchers,
+        "startingLocation": string - Starting location of the tour,
+
+    }
+
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Confirmation</title>
+    <style>
+        html {
+            --hpp-orange: #f05624;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            padding-bottom: 40px;
+            background-color: #f05624;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 0px;
+            padding-bottom: 0px ;
+        }
+        .logo img {
+            max-width: 100%;
+            height: auto;
+            margin: 0px auto;
+            margin-top: -50px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .content {
+            padding: 20px;
+            padding-top: 0px;
+            text-align: left;
+            color: #333333;
+        }
+        .tour-code {
+            padding: 0 20px 20px 20px;
+            text-align: center;
+        }
+        .tour-code p {
+            margin-bottom: 0px;
+        }
+        .tour-code h3 {
+            margin-top: 0px;
+            margin-bottom: 0px;
+            color: #f05624;
+            font-size: 1.75em;
+        }
+        .tour-code p.voucher-code {
+            margin-top: 30px;
+        }
+        .tour-code h3.voucher-code {
+            margin-bottom: 10px;
+        }
+        .tour-code p.link, .tour-code a.link {
+            margin-top: 0px;
+            font-size: 0.8em;
+            line-height: 0.8em;
+        }
+        .tour-code a.link {
+            margin-bottom: 4em;
+            padding-bottom: 4em;
+        }
+        .instructions {
+            padding: 35px 20px 0 20px;
+            text-align: left;
+        }
+        .instructions h3 {
+            margin: 0px;
+            color: #f05624;
+        }
+        .instructions p {
+            margin: 0;
+        }
+        .instructions li {
+            margin: 0;
+            padding-top: .5em;
+        }
+        .instructions .note {
+            font-size: 0.8em;
+            font-style: italic;
+            color: #777777;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            color: #777777;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Thank You for Your Purchase!</h1>
+        </div>
+        <div class="logo">
+            <img src="<%= imgSrc %>" alt="High Proof Tours Logo">
+        </div>
+        <div class="content">
+            <p>Hey <%= name %>,</p>
+            <p>Thanks for inviting us on your Kentucky Bourbon Trail™ road trip. We checked our calendars. We’re totally in!</p>
+        </div>
+        <!-- TOUR PARTIAL -->
+         <div class="tour-code">
+            <p>You just purchased:</p>
+            <h3 class="title"><%= tourTitle %></h3>
+            <% for (let v = 0; v < vouchers.length; v++){ %>
+                <p>Tour Activation Code 
+                    <% if (vouchers.length > 1) { %>
+                        <%= v + 1 %> of <%= vouchers.length %>
+                    <% } %>:</p>
+                <h3 class="voucher-code"><%= vouchers[v].VOUCHER_ID %></h3>
+                <p class="link">Want to use a browser instead of your phone for Steps 2-6? You can follow this link:</p>
+                <a class="link" href="<%= vouchers[v].LINK %>"><%= vouchers[v].LINK %></a>
+            <% }  %>
+            
+         </div>
+        <!-- END TOUR PARTIAL -->
+        <!-- INSTRUCTIONS -->
+        <div class="instructions">
+            <h3>DOWNLOAD INSTRUCTIONS</h3>
+            <p>To access your tour, follow the steps below or <a href="..">watch this demo video</a>.</p>
+            <ol>
+                <li>Download the VoiceMap App →   <a href="https://itunes.apple.com/us/app/voicemap/id852027939">iOS</a> | <a href="https://play.google.com/store/apps/details?id=me.voicemap.android">Android</a></li>
+                <li>Sign up / Sign in</li>
+                <li>Select the <b>“Tour Codes”</b> menu from the bottom navigation bar</li>
+                <li>Select the <b>“Enter Codes”</b> tab in the top-right of the Tour Codes menu</li>
+                <li>Paste in your activation code</li>
+                <li>Hit <b>Submit</b></li>
+                <li>Select the <b>“Library”</b> menu from the bottom navigation bar</li>
+                <li>Click on your tour to open up the tour details</li>
+                <li>Click the red <b>“Download”</b> button</li>
+            </ol>
+            <p class="note">(If you bought a two-part tour and have two codes, just repeat Steps 3 - 9.)</p>
+        </div>
+        <div class="content">
+            <p>Done! Now your tour is on your phone, ready to go,* and you’ll be ready to make your 
+                drive come alive whenever you finish up at <%= startingLocation | 'your first distillery' %>. Thank you so  
+                much for choosing to make our tour a part of your Kentucky Bourbon Trail™ experience. </p>
+            <p>Here's to a trip you’ll talk about for years to come.</p>
+            <p>Cheers!</p>
+            
+            <p>-The High Proof Tours team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2023 High Proof Productions, LLC dba High Proof Tours. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
