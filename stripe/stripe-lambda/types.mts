@@ -47,7 +47,7 @@ export interface Transaction {
 }
 
 
-export interface PurchaseInfo {
+export interface EmailInfo {
     name: string;
     email: string;
     tourTitle: string;

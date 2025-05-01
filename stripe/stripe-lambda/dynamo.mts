@@ -1,5 +1,7 @@
 //  Module for Stipe Lambda end-point to access DynamoDB tables
 
+import 'dotenv/config';
+
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 // let clientDynamodb = require('@aws-sdk/client-dynamodb');
 // let DynamoDBClient = clientDynamodb.DynamoDBClient;
@@ -22,12 +24,13 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 
+let isDev = process.env.IS_DEV == 'true' ? true : false;
 
 // DYNAMODB TOUR TABLE NAMES
-let toursTable = "TOURS"
-let voucherTable = "VM_VOUCHER_CODES"
-let customerTable = "CUSTOMERS"
-let transactionTable = "TRANSACTIONS"
+let toursTable = isDev ? "TOURS_DEV" : "TOURS";
+let voucherTable = isDev ? "VM_VOUCHER_CODES_DEV" : "VM_VOUCHER_CODES"
+let customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS"
+let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS"
 
 
 interface Tour {

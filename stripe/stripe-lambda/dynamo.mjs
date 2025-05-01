@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+import 'dotenv/config';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 // let clientDynamodb = require('@aws-sdk/client-dynamodb');
 // let DynamoDBClient = clientDynamodb.DynamoDBClient;
@@ -49,11 +50,12 @@ var client = new DynamoDBClient({
     region: "us-east-2"
 });
 var docClient = DynamoDBDocumentClient.from(client);
+var isDev = process.env.IS_DEV == 'true' ? true : false;
 // DYNAMODB TOUR TABLE NAMES
-var toursTable = "TOURS";
-var voucherTable = "VM_VOUCHER_CODES";
-var customerTable = "CUSTOMERS";
-var transactionTable = "TRANSACTIONS";
+var toursTable = isDev ? "TOURS_DEV" : "TOURS";
+var voucherTable = isDev ? "VM_VOUCHER_CODES_DEV" : "VM_VOUCHER_CODES";
+var customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS";
+var transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS";
 // ************************
 //  VM_VOUCHER_CODES TABLE
 // ************************

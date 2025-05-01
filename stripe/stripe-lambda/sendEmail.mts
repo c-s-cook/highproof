@@ -3,14 +3,14 @@ import { createTransport } from 'nodemailer';
 import 'dotenv/config';
 
 // import types
-import type { Voucher, PurchaseInfo } from './types.mts';
+import type { Voucher, EmailInfo } from './types.mts';
 
 
 
 
 let imgSrc = 'https://highproofproductions.com/wp-content/uploads/2024/08/high-proof-productions-text-logo-sm-light-e1731699899945.png';
 
-let purchaseInfoDev: PurchaseInfo = {
+let emailInfoDev: EmailInfo = {
     name: 'Brainroot',
     email: 'testing2@brainroot.tv',
     tourTitle: 'Tour Title Test',
@@ -50,17 +50,15 @@ const transporter = createTransport({
 });
 
 
-// render email HTML from EJS template using the purchaseInfo object
-export const renderHTML = async (purchaseInfo: PurchaseInfo) => {
+// render email HTML from EJS template using the emailInfo object
+export const renderHTML = async (emailInfo: EmailInfo, filePath: String) => {
 
-
-
-    let { name, email, tourTitle, vouchers, startingLocation } = purchaseInfo;
+    let { name, email, tourTitle, vouchers, startingLocation } = emailInfo;
     startingLocation = startingLocation || 'your first distillery';
 
     try {
         // render the HTML from the EJS template
-        const html = await renderFile('./email-templates/tmplt_confirmation.ejs', {
+        const html = await renderFile(`${filePath}`, {
             name,
             email,
             tourTitle,
@@ -68,7 +66,7 @@ export const renderHTML = async (purchaseInfo: PurchaseInfo) => {
             startingLocation,
             imgSrc,
         });
-        console.log('HTML rendered successfully:\n\n', html);
+        console.log('HTML rendered successfully:\n\n');
         return html;
     } catch (error) {
         console.error('Error rendering HTML:', error);
@@ -77,18 +75,19 @@ export const renderHTML = async (purchaseInfo: PurchaseInfo) => {
 };
 
 
-// a function that receives a purchaseInfo oject, uses the renderHTML function to create the HTML, and sends the email
-export const sendEmail = async (purchaseInfo: PurchaseInfo) => {
+
+// email the customer their voucher codes + instructions
+export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
     try {
         // render the HTML from the EJS template
-        const html = await renderHTML(purchaseInfo);
+        const html = await renderHTML(emailInfo, './email-templates/tmplt_confirmation.ejs');
 
         // send mail with defined transport object
         const info = await transporter.sendMail({
-            from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`, // sender address
-            to: purchaseInfo.email, // list of receivers
-            subject: `Your drive is about to come alive! | ${purchaseInfo.tourTitle}`, // Subject line
-            text: 'Hello world?', // plain text body
+            from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
+            to: emailInfo.email,
+            subject: `Your drive is about to come alive! | ${emailInfo.tourTitle}`, 
+            text: 'Thanks for your purchase!', // plain text body
             html, // html body
         });
 
@@ -98,4 +97,51 @@ export const sendEmail = async (purchaseInfo: PurchaseInfo) => {
     }
 };
 
-if (process.env.IS_DEV == 'true') sendEmail(purchaseInfoDev);
+
+
+// send email to customer when we didn't find all of their vouchers
+export const emailCustomerPending = async (emailInfo: EmailInfo) => {
+    try {
+        // render the HTML from the EJS template
+        const html = await renderHTML(emailInfo, './email-templates/tmplt_pending.ejs');
+
+        // send mail with defined transport object
+        const info = await transporter.sendMail({
+            from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
+            to: emailInfo.email,
+            subject: `Your drive is about to come alive! | ${emailInfo.tourTitle}`, 
+            text: 'Thanks for your purchase!', // plain text body
+            html, // html body
+        });
+
+        console.log('Message sent: %s', info.messageId);
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+};
+
+
+// send email to adminstrator when there's an issue
+export const emailAdmin = async (alertInfo) => {
+
+
+    try {
+        // send mail with defined transport object
+        const info = await transporter.sendMail({
+            from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
+            to: 'christopher@highproofproductions.com',
+            subject: `!! Stripe/Voucher Issue !!  ${alertInfo.subject}`, 
+            text: JSON.stringify(alertInfo, null, 2), // plain text body
+        });
+
+        console.log('Message sent: %s', info.messageId);
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+};
+
+
+
+
+
+// if (process.env.IS_DEV == 'true') emailCustomerCodes(emailInfoDev);

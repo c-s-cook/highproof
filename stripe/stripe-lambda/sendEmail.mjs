@@ -38,7 +38,7 @@ import { renderFile } from 'ejs';
 import { createTransport } from 'nodemailer';
 import 'dotenv/config';
 var imgSrc = 'https://highproofproductions.com/wp-content/uploads/2024/08/high-proof-productions-text-logo-sm-light-e1731699899945.png';
-var purchaseInfoDev = {
+var emailInfoDev = {
     name: 'Brainroot',
     email: 'testing2@brainroot.tv',
     tourTitle: 'Tour Title Test',
@@ -73,18 +73,18 @@ var transporter = createTransport({
         pass: process.env.HPP_EMAIL_PSWD, // generated ethereal password
     },
 });
-// render email HTML from EJS template using the purchaseInfo object
-export var renderHTML = function (purchaseInfo) { return __awaiter(void 0, void 0, void 0, function () {
+// render email HTML from EJS template using the emailInfo object
+export var renderHTML = function (emailInfo, filePath) { return __awaiter(void 0, void 0, void 0, function () {
     var name, email, tourTitle, vouchers, startingLocation, html, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                name = purchaseInfo.name, email = purchaseInfo.email, tourTitle = purchaseInfo.tourTitle, vouchers = purchaseInfo.vouchers, startingLocation = purchaseInfo.startingLocation;
+                name = emailInfo.name, email = emailInfo.email, tourTitle = emailInfo.tourTitle, vouchers = emailInfo.vouchers, startingLocation = emailInfo.startingLocation;
                 startingLocation = startingLocation || 'your first distillery';
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, renderFile('./email-templates/tmplt_confirmation.ejs', {
+                return [4 /*yield*/, renderFile("".concat(filePath), {
                         name: name,
                         email: email,
                         tourTitle: tourTitle,
@@ -94,7 +94,7 @@ export var renderHTML = function (purchaseInfo) { return __awaiter(void 0, void 
                     })];
             case 2:
                 html = _a.sent();
-                console.log('HTML rendered successfully:\n\n', html);
+                console.log('HTML rendered successfully:\n\n');
                 return [2 /*return*/, html];
             case 3:
                 error_1 = _a.sent();
@@ -104,21 +104,21 @@ export var renderHTML = function (purchaseInfo) { return __awaiter(void 0, void 
         }
     });
 }); };
-// a function that receives a purchaseInfo oject, uses the renderHTML function to create the HTML, and sends the email
-export var sendEmail = function (purchaseInfo) { return __awaiter(void 0, void 0, void 0, function () {
+// email the customer their voucher codes + instructions
+export var emailCustomerCodes = function (emailInfo) { return __awaiter(void 0, void 0, void 0, function () {
     var html, info, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
-                return [4 /*yield*/, renderHTML(purchaseInfo)];
+                return [4 /*yield*/, renderHTML(emailInfo, './email-templates/tmplt_confirmation.ejs')];
             case 1:
                 html = _a.sent();
                 return [4 /*yield*/, transporter.sendMail({
-                        from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"), // sender address
-                        to: purchaseInfo.email, // list of receivers
-                        subject: "Your drive is about to come alive! | ".concat(purchaseInfo.tourTitle), // Subject line
-                        text: 'Hello world?', // plain text body
+                        from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
+                        to: emailInfo.email,
+                        subject: "Your drive is about to come alive! | ".concat(emailInfo.tourTitle),
+                        text: 'Thanks for your purchase!', // plain text body
                         html: html,
                     })];
             case 2:
@@ -133,5 +133,58 @@ export var sendEmail = function (purchaseInfo) { return __awaiter(void 0, void 0
         }
     });
 }); };
-if (process.env.IS_DEV == 'true')
-    sendEmail(purchaseInfoDev);
+// send email to customer when we didn't find all of their vouchers
+export var emailCustomerPending = function (emailInfo) { return __awaiter(void 0, void 0, void 0, function () {
+    var html, info, error_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, renderHTML(emailInfo, './email-templates/tmplt_pending.ejs')];
+            case 1:
+                html = _a.sent();
+                return [4 /*yield*/, transporter.sendMail({
+                        from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
+                        to: emailInfo.email,
+                        subject: "Your drive is about to come alive! | ".concat(emailInfo.tourTitle),
+                        text: 'Thanks for your purchase!', // plain text body
+                        html: html,
+                    })];
+            case 2:
+                info = _a.sent();
+                console.log('Message sent: %s', info.messageId);
+                return [3 /*break*/, 4];
+            case 3:
+                error_3 = _a.sent();
+                console.error('Error sending email:', error_3);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+// send email to adminstrator when there's an issue
+export var emailAdmin = function (alertInfo) { return __awaiter(void 0, void 0, void 0, function () {
+    var info, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, transporter.sendMail({
+                        from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
+                        to: 'christopher@highproofproductions.com',
+                        subject: "!! Stripe/Voucher Issue !!  ".concat(alertInfo.subject),
+                        text: JSON.stringify(alertInfo, null, 2), // plain text body
+                    })];
+            case 1:
+                info = _a.sent();
+                console.log('Message sent: %s', info.messageId);
+                return [3 /*break*/, 3];
+            case 2:
+                error_4 = _a.sent();
+                console.error('Error sending email:', error_4);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+// if (process.env.IS_DEV == 'true') emailCustomerCodes(emailInfoDev);

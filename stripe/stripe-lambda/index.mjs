@@ -1,6 +1,7 @@
 import stripePackage from 'stripe';
 import 'dotenv/config';
 import  { getTourVoucher, updateVoucher, findCustomer, createCustomer, updateCustomer, recordTransaction } from './dynamo.mjs';
+import { emailCustomerCodes, emailCustomerPending, emailAdmin } from './sendEmail.mjs';
 
 let isDev = process.env.IS_DEV == 'true' ? true : false;
 let isLocal = process.env.IS_LOCAL == 'true' ? true : false;
@@ -21,6 +22,7 @@ const getTransactionDetails = async (csID = checkoutSessionID) => {
 
     return {
         tourIDs: session.line_items.data[0].price.product.metadata.TOUR_IDS.split(', '),
+        startingLocation: session.line_items.data[0].price.product.metadata.STARTING_LOCATION.split(', '),
         tourTitle: session.line_items.data[0].price.product.name,
         customer: session.customer_details,
         created: new Date().getTime()
@@ -42,16 +44,29 @@ const runDynamoActions = async (stripeEvent) => {
 
     // get the vouchers for each tourID in the purchaseInfo
     for (const tourID of purchaseInfo.tourIDs) {
-        console.log('seeking voucher for tourID ', tourID);
-        let voucherResult = await getTourVoucher(Number(tourID));
-        if (voucherResult) vouchers.push(voucherResult.voucher);
-        if (voucherResult.count < 10) voucherWarnings.push(voucherResult);
-        console.log(`${tourID} voucher = `, voucherResult.voucher);
-        console.log('vouchers = ', vouchers);
+        try {
+            console.log('seeking voucher for tourID ', tourID);
+            let voucherResult = await getTourVoucher(Number(tourID));
+            if (voucherResult) vouchers.push(voucherResult.voucher);
+            if (voucherResult.count < 10) voucherWarnings.push(voucherResult);
+            console.log(`${tourID} voucher = `, voucherResult.voucher);
+            console.log('vouchers = ', vouchers);
+        } catch (error) {
+            console.log('getTourVoucher() error = ', error)
+        }
+
     }
 
-    if (voucherWarnings.length > 0) console.log('fire off warning email to admin');
-    // TO DO:  write email function for sending message to admin if voucher count is low
+    if (voucherWarnings.length > 0) {
+        console.log("\n\nemailing admin about low voucher counts...");
+        await emailAdmin({
+            subject: 'Voucher count low',
+            body: `The following vouchers have low counts: `,
+            voucherWarning: voucherWarnings,
+        })
+    }
+
+
 
     // check that vouchers were found for all tourIDs
     if (vouchers.length == purchaseInfo.tourIDs.length) {
@@ -87,14 +102,55 @@ const runDynamoActions = async (stripeEvent) => {
             }
         }
 
-        // record the transaction
-        let transaction = await recordTransaction(checkoutSessionID, purchaseInfo.customer.email, purchaseInfo.created, voucherIDs)
-        console.log(transaction);    
+        try {
+            // record the transaction
+            let transaction = await recordTransaction(checkoutSessionID, purchaseInfo.customer.email, purchaseInfo.created, voucherIDs)
+            console.log(transaction);
+        } catch(error) {
+            console.log('error = ', error);
+        }
+        console.log('moving on...');
+        
+        console.log('Got all the vouchers. Sending an email to customer with codes...');
+        await emailCustomerCodes({ 
+            name: purchaseInfo.customer.name, 
+            email: purchaseInfo.customer.email, 
+            tourTitle: purchaseInfo.tourTitle, 
+            vouchers: vouchers, 
+            startingLocation: purchaseInfo.startingLocation
+        });
+
+        return 'success';
+        
 
     } else {
         console.log('not all vouchers found for tourIDs = ', purchaseInfo.tourIDs);
         console.log('vouchers = ', vouchers);
         console.log('voucherIDs = ', voucherIDs);
+
+        // email customer confirmation of purchase and pending vouchers
+        console.log("Didn't get all the vouchers. Sending a Pending email...")
+        await emailCustomerPending({
+            error: 'not all vouchers found for tourIDs', 
+            name: purchaseInfo.customer.name, 
+            email: purchaseInfo.customer.email, 
+            tourTitle: purchaseInfo.tourTitle, 
+            vouchers: vouchers, 
+            startingLocation: purchaseInfo.startingLocation
+        });
+
+        // email the admin about the missing vouchers
+        console.log('\n\nemailing admin about missing vouchers...');
+        await emailAdmin({
+            subject: 'Voucher not found',
+            body: `The following vouchers were not found for tourIDs: `,
+            purchaseInfo: purchaseInfo,
+            vouchers: vouchers,
+            voucherIDs: voucherIDs,
+            checkoutSessionID: checkoutSessionID,
+        })
+
+        return 'error';
     }
 
     console.log('\n\n\n\n\n Tour Title = ', purchaseInfo.tourTitle);
@@ -135,8 +191,8 @@ export const handler = async (event) => {
 
         case 'checkout.session.completed':
 
-            await runDynamoActions(stripeEvent);
-
+            let emailInfo = await runDynamoActions(stripeEvent);
+            
             break;
 
         // ... handle other event types
