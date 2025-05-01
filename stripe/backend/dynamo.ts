@@ -12,10 +12,16 @@ let { PutCommand, GetCommand, QueryCommand, DynamoDBDocumentClient, ScanCommand,
 let credentialProviders = require('@aws-sdk/credential-providers');
 let fromEnv = credentialProviders.fromEnv;
 
+let dotenv = require('dotenv');
+dotenv.config();
+
+let isDev = process.env.IS_DEV == 'true' ? true : false;
 
 // DYNAMODB TOUR TABLE NAMES
-let toursTable = "TOURS"
-let voucherTable = "VM_VOUCHER_CODES"
+let toursTable = isDev ? "TOURS_DEV" : "TOURS";
+let voucherTable = isDev ? "VM_VOUCHER_CODES_DEV" : "VM_VOUCHER_CODES"
+let customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS"
+let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS"
 
 
 interface Tour {
@@ -212,7 +218,7 @@ const getVoucherById = async (voucherId: string) => {
 // retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
 const getMostRecentVoucher = async () => {
     const command = new ScanCommand({
-        TableName: "VM_VOUCHER_CODES",
+        TableName: voucherTable,
         IndexName: "CreatedIndex",
         ScanIndexForward: false,  // This sorts in descending order (newest first)
         Limit: 1  // This gets only the first (newest) item    

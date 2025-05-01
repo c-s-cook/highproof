@@ -62,18 +62,21 @@ const checkAllConfirmed = () => {
 
     // Add new tourNumber for newTourTitles to matching vouchers...
     let tourNumbers = []
-    toursInDB.map((tour) => tourNumbers.push(tour.TOUR_NUM))
-    let newTourNum = Math.max(...tourNumbers)
+    let newTourNum = 0;
+    if(toursInDB.length > 0) {
+        toursInDB.map((tour) => tourNumbers.push(tour.TOUR_NUM))
+        newTourNum = Math.max(...tourNumbers)
+    }
 
-    for(let t = 0; t < newTourTitles.length; t++){
+    for(let t = newTourTitles.length; t > 0; t--){
         newTourNum += 1;
         console.log(newTourNum)
         for(let v = 0; v < vouchers.length; v++){
-            if(vouchers[v].TourTitle == newTourTitles[t].TourTitle.TITLE){
+            if(vouchers[v].TourTitle == newTourTitles[t-1].TourTitle.TITLE){
                 vouchers[v].TOUR_NUM = newTourNum
                 vouchers[v].isNewTour = true
                 vouchers[v].allTitles = null
-                newTourTitles[t].tourNumber = newTourNum
+                newTourTitles[t-1].tourNumber = newTourNum
             }
         }
     }
@@ -885,23 +888,24 @@ function  actionCreateVouchers(){
             return [];
         }
 
-        // Test it's voucher code + creation Data against current CSV vouchers...
-        for (let v = 0; v < vouchers.length; v++){
-            if(new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)) {
-                // add nothing. element's abscense will be the key
-                console.log("this voucher was newer")
-            } else if (vouchers[v].VOUCHER_ID == latestDbVoucher.VOUCHER_ID) {
-                vouchers[v].dbStatus = "confirmed-in-database"
-                console.log("this was the same voucher")
-            } else {
-                // if the CREATED date isn't greater that (later / after) the most recent
-                // AND it's not the same voucher, assume it was created on or before
-                // the current voucher and therefore is like to already be in the database
-                vouchers[v].dbStatus = "likely-in-database"
-                console.log("this voucher had the same or earlier creation date")
+        if(latestDbVoucher){
+            // Test it's voucher code + creation Data against current CSV vouchers...
+            for (let v = 0; v < vouchers.length; v++){
+                if(new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)) {
+                    // add nothing. element's abscense will be the key
+                    console.log("this voucher was newer")
+                } else if (vouchers[v].VOUCHER_ID == latestDbVoucher.VOUCHER_ID) {
+                    vouchers[v].dbStatus = "confirmed-in-database"
+                    console.log("this was the same voucher")
+                } else {
+                    // if the CREATED date isn't greater that (later / after) the most recent
+                    // AND it's not the same voucher, assume it was created on or before
+                    // the current voucher and therefore is like to already be in the database
+                    vouchers[v].dbStatus = "likely-in-database"
+                    console.log("this voucher had the same or earlier creation date")
+                }
             }
         }
-
 
         // Update UI with results + state we assume that all vouchers with the same + 
         // older CREATED Date are already in the DB. Give Three Options:
@@ -950,51 +954,54 @@ function  actionCreateVouchers(){
 
 
 
-fileInput.addEventListener('change', async function(event) {
+fileInput.addEventListener('change', async function (event) {
     const file = event.target.files[0];
 
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             var lines = this.result.split(/\r\n|\n/);
             var startAt = lines[0].split(",")[0] == "Voucher Name" ? 1 : 0;
             console.log(startAt);
             for (var line = startAt; line < lines.length - 1; line++) {
-              // console.log(line + ' --> ' + lines[line]);
-              var columns = lines[line].split(",");
-              var voucher = {
-                "VOUCHER_ID": columns[0],
-                "TourTitle": columns[1],
-                "Quantity": columns[2],
-                "REDEEMED": columns[3] == "0" ? false : true,
-                "State": columns[4],
-                "TOUR_NUM": null,
-                "LINK": columns[5],
-                "AVAILABLE": columns[3] == "0" ? true : false,
-                "CREATED": columns[6],
-                "PURCHASED": null,      //Date()
-                "TRANSACTION_ID": null  //Str / Foreign Key
-              }
-              vouchers.push(voucher);
-              if(voucher.REDEEMED != "1") availableVouchers.push(voucher);
+                // console.log(line + ' --> ' + lines[line]);
+                //   var columns = lines[line].split(",");
+                // split each line into an array of columns
+                var columns = lines[line].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (columns[1] == "") continue; // skip empty lines
+                var voucher = {
+                    "VOUCHER_ID": columns[0],
+                    "TourTitle": columns[1].replace(/^"|"$/g, ''),
+                    "Quantity": columns[2],
+                    "REDEEMED": columns[3] == "0" ? false : true,
+                    "State": columns[4],
+                    "TOUR_NUM": null,
+                    "LINK": columns[5],
+                    "AVAILABLE": columns[3] == "0" ? true : false,
+                    "CREATED": columns[6],
+                    "PURCHASED": null,      //Date()
+                    "TRANSACTION_ID": null  //Str / Foreign Key
+                }
+                vouchers.push(voucher);
+                if (voucher.REDEEMED != "1") availableVouchers.push(voucher);
 
-              var foundIt = false;
-              if (tourTitles.length > 0){
-                for (var t = 0; t < tourTitles.length; t++){
-                    if (columns[1] == tourTitles[t].TITLE) {
-                        tourTitles[t].COUNT += 1;
-                        foundIt = true;
-                        break;
+                var foundIt = false;
+                if (tourTitles.length > 0) {
+                    for (var t = 0; t < tourTitles.length; t++) {
+                        if (columns[1].replace(/^"|"$/g, '') == tourTitles[t].TITLE) {
+                            tourTitles[t].COUNT += 1;
+                            foundIt = true;
+                            break;
+                        }
                     }
                 }
-              } 
-              if (!foundIt) {
-                tourTitles.push({
-                    "TITLE": columns[1],
-                    "COUNT": 1
-                })
-              }
-            //   if(!tourTitles.includes(columns[1])) tourTitles.push(columns[1]);
+                if (!foundIt) {
+                    tourTitles.push({
+                        "TITLE": columns[1].replace(/^"|"$/g, ''),
+                        "COUNT": 1
+                    })
+                }
+                //   if(!tourTitles.includes(columns[1])) tourTitles.push(columns[1]);
 
             }
 
@@ -1017,11 +1024,11 @@ fileInput.addEventListener('change', async function(event) {
         const data = await response.json();
         toursInDB = data.Items;
         Object.freeze(toursInDB);
-        for(let o = 0; o < toursInDB.length; o++){
+        for (let o = 0; o < toursInDB.length; o++) {
             Object.freeze(toursInDB[o].TITLES)
             Object.freeze(toursInDB[o])
         }
-        
+
         console.log("toursInDB = ", toursInDB)
     } catch (error) {
         console.log(error);
@@ -1033,11 +1040,11 @@ fileInput.addEventListener('change', async function(event) {
 
     // COMPARE NEW VOURCHERS' TOUR NAMES AGAINST EXISTING TOUR NAMES
 
-    for (var nt = 0; nt < tourTitles.length; nt++){
+    for (var nt = 0; nt < tourTitles.length; nt++) {
         let titleExists = false;
         let tourNumber = null;
-        for (var et = 0; et < toursInDB.length; et++){
-            if(toursInDB[et].TITLES[0] == tourTitles[nt].TITLE) {
+        for (var et = 0; et < toursInDB.length; et++) {
+            if (toursInDB[et].TITLES[0] == tourTitles[nt].TITLE) {
                 titleExists = true;
                 tourNumber = et;
                 console.log("Found tour - ", tourTitles[nt].TITLE, " - in TOUR ", toursInDB[et].TOUR_NUM, ". --> ", toursInDB[et].TITLES);
@@ -1068,7 +1075,7 @@ fileInput.addEventListener('change', async function(event) {
 
     displayVouchers();
     displayTourTitleResults();
-    
+
 
 });
 
