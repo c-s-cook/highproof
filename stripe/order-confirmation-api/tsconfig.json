@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "declaration": true // Generate .d.ts files alongside .js files
+  },
+  "include": ["./**/*.ts", "./**/*.mts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}
