@@ -69,7 +69,7 @@ var transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS";
  */
 export function getTourVoucher(tourNum) {
     return __awaiter(this, void 0, void 0, function () {
-        var params, runQueryCommand, voucher, attempts, result, voucherResult;
+        var params, runQueryCommand, voucher, attempts, voucherResult, result;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -106,6 +106,7 @@ export function getTourVoucher(tourNum) {
                     }); };
                     voucher = null;
                     attempts = 1;
+                    voucherResult = null;
                     _a.label = 1;
                 case 1:
                     if (!!voucher) return [3 /*break*/, 3];
@@ -124,7 +125,7 @@ export function getTourVoucher(tourNum) {
                             attempts: attempts
                         };
                         console.log("dynamo voucher result = ", voucher);
-                        return [2 /*return*/, voucherResult];
+                        return [3 /*break*/, 3]; // Exit the loop if a voucher is found
                     }
                     else if (result.LastEvaluatedKey) {
                         params.ExclusiveStartKey = result.LastEvaluatedKey; // Set the start key for the next query
@@ -133,7 +134,7 @@ export function getTourVoucher(tourNum) {
                         throw new Error("No available vouchers found for tour number ".concat(tourNum, "."));
                     }
                     return [3 /*break*/, 1];
-                case 3: return [2 /*return*/];
+                case 3: return [2 /*return*/, voucherResult];
             }
         });
     });
@@ -342,7 +343,7 @@ export function createCustomer(email, transactionID, name, address) {
  * @param {string[]} vouchers - Array of voucher codes sent in this transaction
  * @return {Promise<string>} - Success message or error message
  */
-export function recordTransaction(transactionID, customer, date, vouchers) {
+export function recordTransaction(transactionID, customer, name, date, vouchers, tourNums, tourTitle) {
     return __awaiter(this, void 0, void 0, function () {
         var params, command, error_6;
         return __generator(this, function (_a) {
@@ -355,7 +356,10 @@ export function recordTransaction(transactionID, customer, date, vouchers) {
                             TRANSACTION_ID: transactionID,
                             CUSTOMER: customer,
                             DATE: date,
-                            VOUCHERS: vouchers
+                            VOUCHERS: vouchers,
+                            NAME: name,
+                            TOUR_NUMS: tourNums,
+                            TOUR_TITLE: tourTitle
                         },
                         ConditionExpression: "attribute_not_exists(TRANSACTION_ID)"
                     };

@@ -104,7 +104,18 @@ const runDynamoActions = async (stripeEvent) => {
 
         try {
             // record the transaction
-            let transaction = await recordTransaction(checkoutSessionID, purchaseInfo.customer.email, purchaseInfo.created, voucherIDs)
+            let tourIDsNumbers = purchaseInfo.tourIDs.map(t => Number(t));  // convert to numbers
+            console.log('tourIDsNumbers = ', tourIDsNumbers);
+
+            let transaction = await recordTransaction(
+                checkoutSessionID, 
+                purchaseInfo.customer.email, 
+                purchaseInfo.customer.name, 
+                purchaseInfo.created, 
+                voucherIDs,
+                tourIDsNumbers,
+                purchaseInfo.tourTitle,
+            )
             console.log(transaction);
         } catch(error) {
             console.log('error = ', error);

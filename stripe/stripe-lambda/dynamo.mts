@@ -76,7 +76,10 @@ interface Customer {
 interface Transaction {
     TRANSACTION_ID: string;     // the Checkout.session ID
     CUSTOMER: string;           // their email | Foreign Key to CUSTOMERS table
+    NAME: string;              // their name  
     VOUCHERS: string[];         // list of VOUCHER_ID strings
+    TOUR_NUMS: number[];         // list of TOUR_NUMs 
+    TOUR_TITLE: string;        // the tour title 
     DATE: number;               // new Date().valueOf() == ms as number
 }
 
@@ -346,7 +349,7 @@ export async function createCustomer(email: string, transactionID: string, name:
  * @param {string[]} vouchers - Array of voucher codes sent in this transaction
  * @return {Promise<string>} - Success message or error message
  */
-export async function recordTransaction(transactionID: string, customer: string, date: number, vouchers: string[]): Promise<string> {
+export async function recordTransaction(transactionID: string, customer: string, name: string, date: number, vouchers: string[], tourNums: number[], tourTitle: string): Promise<string> {
     try {
         const params = {
             TableName: transactionTable,
@@ -354,7 +357,10 @@ export async function recordTransaction(transactionID: string, customer: string,
                 TRANSACTION_ID: transactionID,
                 CUSTOMER: customer,
                 DATE: date,
-                VOUCHERS: vouchers
+                VOUCHERS: vouchers,
+                NAME: name,
+                TOUR_NUMS: tourNums,
+                TOUR_TITLE: tourTitle
             },
             ConditionExpression: "attribute_not_exists(TRANSACTION_ID)"
         };
