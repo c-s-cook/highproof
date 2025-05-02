@@ -52,8 +52,8 @@ interface Voucher {
 
 interface VoucherResult {
     voucher: Voucher;
-    count: number;
-    scannedCount: number;
+    count: number | undefined;
+    scannedCount: number | undefined;
     attempts: number;
 }
 
@@ -130,6 +130,7 @@ export async function getTourVoucher(tourNum: number): Promise<VoucherResult> {
 
     let voucher: Voucher | null = null;
     let attempts = 1;
+    let voucherResult: VoucherResult | null = null;
     
     while (!voucher) {
         console.log("attempt #", attempts);
@@ -139,20 +140,22 @@ export async function getTourVoucher(tourNum: number): Promise<VoucherResult> {
 
         if (result.Items && result.Items.length > 0) {
             voucher = result.Items[0] as Voucher;
-            let voucherResult = {
+            voucherResult = {
                 voucher: voucher,
                 count: result.Count,
                 scannedCount: result.ScannedCount,
                 attempts: attempts
             }
             console.log("dynamo voucher result = ", voucher);
-            return voucherResult as VoucherResult;
+            break; // Exit the loop if a voucher is found
+            
         } else if (result.LastEvaluatedKey) {
             params.ExclusiveStartKey = result.LastEvaluatedKey; // Set the start key for the next query
         } else {
             throw new Error(`No available vouchers found for tour number ${tourNum}.`);
         }
     }
+    return voucherResult as VoucherResult;
 }
 
 

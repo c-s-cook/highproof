@@ -123,12 +123,12 @@ export var emailCustomerCodes = function (emailInfo) { return __awaiter(void 0, 
                     })];
             case 2:
                 info = _a.sent();
-                console.log('Message sent: %s', info.messageId);
-                return [3 /*break*/, 4];
+                console.log('Confirmation & Codes Message sent: %s', info.messageId);
+                return [2 /*return*/, { 'message': "Message Codes successfully sent: ".concat(info.messageId) }];
             case 3:
                 error_2 = _a.sent();
-                console.error('Error sending email:', error_2);
-                return [3 /*break*/, 4];
+                console.error('Error sending Codes email:', error_2);
+                return [2 /*return*/, { 'error': "Codes Message error: ".concat(error_2) }];
             case 4: return [2 /*return*/];
         }
     });
@@ -152,12 +152,12 @@ export var emailCustomerPending = function (emailInfo) { return __awaiter(void 0
                     })];
             case 2:
                 info = _a.sent();
-                console.log('Message sent: %s', info.messageId);
-                return [3 /*break*/, 4];
+                console.log('Pending Message sent: %s', info.messageId);
+                return [2 /*return*/, { 'message': "Message Pending successfully sent: ".concat(info.messageId) }];
             case 3:
                 error_3 = _a.sent();
-                console.error('Error sending email:', error_3);
-                return [3 /*break*/, 4];
+                console.error('Error sending Pending email:', error_3);
+                return [2 /*return*/, { 'error': "Pending Message error: ".concat(error_3) }];
             case 4: return [2 /*return*/];
         }
     });
@@ -177,12 +177,12 @@ export var emailAdmin = function (alertInfo) { return __awaiter(void 0, void 0, 
                     })];
             case 1:
                 info = _a.sent();
-                console.log('Message sent: %s', info.messageId);
-                return [3 /*break*/, 3];
+                console.log('Admin message sent: %s', info.messageId);
+                return [2 /*return*/, { 'message': "Admin message successfully sent: ".concat(info.messageId) }];
             case 2:
                 error_4 = _a.sent();
-                console.error('Error sending email:', error_4);
-                return [3 /*break*/, 3];
+                console.error('Error sending admin email:', error_4);
+                return [2 /*return*/, { 'error': "Admin Message error: ".concat(error_4) }];
             case 3: return [2 /*return*/];
         }
     });

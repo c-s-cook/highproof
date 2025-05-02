@@ -79,8 +79,10 @@ export const renderHTML = async (emailInfo: EmailInfo, filePath: String) => {
 // email the customer their voucher codes + instructions
 export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
     try {
+        console.log('starting emailCustomerCodes...');
         // render the HTML from the EJS template
         const html = await renderHTML(emailInfo, './email-templates/tmplt_confirmation.ejs');
+        console.log('Codes HTML received successfully:\n\n');
 
         // send mail with defined transport object
         const info = await transporter.sendMail({
@@ -91,9 +93,11 @@ export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
             html, // html body
         });
 
-        console.log('Message sent: %s', info.messageId);
+        console.log('Confirmation & Codes Message sent: %s', info.messageId);
+        return {'message': `Message Codes successfully sent: ${info.messageId}`};
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending Codes email:', error);
+        return {'error': `Codes Message error: ${error}`};
     }
 };
 
@@ -102,8 +106,10 @@ export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
 // send email to customer when we didn't find all of their vouchers
 export const emailCustomerPending = async (emailInfo: EmailInfo) => {
     try {
+        console.log('starting emailCustomerPending...');
         // render the HTML from the EJS template
         const html = await renderHTML(emailInfo, './email-templates/tmplt_pending.ejs');
+        console.log('Pending HTML received successfully:\n\n');
 
         // send mail with defined transport object
         const info = await transporter.sendMail({
@@ -114,15 +120,17 @@ export const emailCustomerPending = async (emailInfo: EmailInfo) => {
             html, // html body
         });
 
-        console.log('Message sent: %s', info.messageId);
+        console.log('Pending Message sent: %s', info.messageId);
+        return {'message': `Message Pending successfully sent: ${info.messageId}`};
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending Pending email:', error);
+        return {'error': `Pending Message error: ${error}`};
     }
 };
 
 
 // send email to adminstrator when there's an issue
-export const emailAdmin = async (alertInfo) => {
+export const emailAdmin = async (alertInfo: any) => {
 
 
     try {
@@ -134,9 +142,11 @@ export const emailAdmin = async (alertInfo) => {
             text: JSON.stringify(alertInfo, null, 2), // plain text body
         });
 
-        console.log('Message sent: %s', info.messageId);
+        console.log('Admin message sent: %s', info.messageId);
+        return {'message': `Admin message successfully sent: ${info.messageId}`};
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending admin email:', error);
+        return {'error': `Admin Message error: ${error}`};
     }
 };
 

@@ -112,7 +112,7 @@ const runDynamoActions = async (stripeEvent) => {
         console.log('moving on...');
         
         console.log('Got all the vouchers. Sending an email to customer with codes...');
-        await emailCustomerCodes({ 
+        let emailCodesResults = await emailCustomerCodes({ 
             name: purchaseInfo.customer.name, 
             email: purchaseInfo.customer.email, 
             tourTitle: purchaseInfo.tourTitle, 
@@ -120,6 +120,7 @@ const runDynamoActions = async (stripeEvent) => {
             startingLocation: purchaseInfo.startingLocation
         });
 
+        console.log('emailCodesResults = ', emailCodesResults);
         return 'success';
         
 
@@ -130,7 +131,7 @@ const runDynamoActions = async (stripeEvent) => {
 
         // email customer confirmation of purchase and pending vouchers
         console.log("Didn't get all the vouchers. Sending a Pending email...")
-        await emailCustomerPending({
+        let emailPendingResults = await emailCustomerPending({
             error: 'not all vouchers found for tourIDs', 
             name: purchaseInfo.customer.name, 
             email: purchaseInfo.customer.email, 
@@ -138,27 +139,29 @@ const runDynamoActions = async (stripeEvent) => {
             vouchers: vouchers, 
             startingLocation: purchaseInfo.startingLocation
         });
+        console.log('emailPendingResults = ', emailPendingResults);
 
         // email the admin about the missing vouchers
         console.log('\n\nemailing admin about missing vouchers...');
-        await emailAdmin({
+        let emailAdminResults = await emailAdmin({
             subject: 'Voucher not found',
             body: `The following vouchers were not found for tourIDs: `,
             purchaseInfo: purchaseInfo,
             vouchers: vouchers,
             voucherIDs: voucherIDs,
             checkoutSessionID: checkoutSessionID,
-        })
+        });
+        console.log('emailAdminResults = ', emailAdminResults);
 
         return 'error';
     }
 
-    console.log('\n\n\n\n\n Tour Title = ', purchaseInfo.tourTitle);
-    console.log('Tour IDs = ', purchaseInfo.tourIDs);
-    console.log('voucherIDs = ', voucherIDs);
-    console.log('customer = ', purchaseInfo.customer);
-    console.log('created = ', purchaseInfo.created);
-    console.log('checkoutSessionID = ', checkoutSessionID);
+    // console.log('\n\n\n\n\n Tour Title = ', purchaseInfo.tourTitle);
+    // console.log('Tour IDs = ', purchaseInfo.tourIDs);
+    // console.log('voucherIDs = ', voucherIDs);
+    // console.log('customer = ', purchaseInfo.customer);
+    // console.log('created = ', purchaseInfo.created);
+    // console.log('checkoutSessionID = ', checkoutSessionID);
 }
 
 
@@ -167,22 +170,21 @@ const runDynamoActions = async (stripeEvent) => {
 export const handler = async (event) => {
       
     console.log('event.body.type = ', event.body.type);
-    // if (event.body.type != 'checkout.session.completed') return
+    if (event.body.type != 'checkout.session.completed') {
+        console.log("exiting the script since it wasn't a checkout.session.completed event.")
+        return  { statusCode: 200, body: 'Got it, but only running the script for checkout.session.completed. So this is the end.' };
+    } 
     
     const sig = event.headers['Stripe-Signature'];
 
     let stripeEvent;
 
     try {
-
         stripeEvent = stripe.webhooks.constructEvent(event.rawBody, sig, stripeWebhookSecret);
         console.log('stripeEvent = ', stripeEvent);
-
     } catch (err) {
-
         console.log('err = ', err);
         return { statusCode: 400, body: `Webhook Error: ${err.message}` };
-
     }
 
     // Handle the event
@@ -196,15 +198,15 @@ export const handler = async (event) => {
             break;
 
         // ... handle other event types
-
         case 'payment_intent.succeeded':
 
             const paymentIntent = stripeEvent.data.object;
-            console.log('paymentIntent = ', paymentIntent);
+            console.log('should not have gotten here, but paymentIntent = ', paymentIntent);
 
         default:
 
             console.log(`Unhandled event type ${stripeEvent.type}`);
+            return { statusCode: 400, body: `Unhandled event type ${stripeEvent.type}` };
 
     }
 
@@ -212,4 +214,4 @@ export const handler = async (event) => {
 
 }
 
-if (isLocal) await runDynamoActions({ data: { object: { id: checkoutSessionID } } });
+// if (isLocal) await runDynamoActions({ data: { object: { id: checkoutSessionID } } });
