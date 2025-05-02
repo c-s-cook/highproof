@@ -4,7 +4,8 @@
 * @description --- This file contains the order confirmation API for the Stripe payment system.
 */
 import 'dotenv.config';
-import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 let isDev = process.env.IS_DEV == 'true' ? true : false;
 // DYNAMODB TOUR TABLE NAMES
 // let toursTable = isDev ? "TOURS_DEV" : "TOURS";
@@ -12,6 +13,7 @@ let isDev = process.env.IS_DEV == 'true' ? true : false;
 // let customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS"
 let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS";
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
+const docClient = DynamoDBDocumentClient.from(client);
 export const handler = async (event) => {
     try {
         const transactionId = event.queryStringParameters?.TRANSACTION_ID;
@@ -22,10 +24,10 @@ export const handler = async (event) => {
             };
         }
         // Fetch the Transaction object
-        const transactionResult = await client.send(new GetItemCommand({
+        const transactionResult = await docClient.send(new GetCommand({
             TableName: transactionTable,
             Key: {
-                TRANSACTION_ID: { S: transactionId },
+                TRANSACTION_ID: transactionId,
             },
         }));
         if (!transactionResult.Item) {

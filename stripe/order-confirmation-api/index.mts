@@ -5,6 +5,7 @@
 
 
 import 'dotenv.config';
+import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 
@@ -31,6 +32,8 @@ let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS"
 
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
+const docClient = DynamoDBDocumentClient.from(client);
+
 
 export const handler = async (event: any) => {
     try {
@@ -43,12 +46,12 @@ export const handler = async (event: any) => {
         }
 
         // Fetch the Transaction object
-        const transactionResult = await client.send(
-            new GetItemCommand({
-                TableName: transactionTable,
-                Key: {
-                    TRANSACTION_ID: { S: transactionId },
-                },
+        const transactionResult = await docClient.send(
+            new GetCommand({
+            TableName: transactionTable,
+            Key: {
+                TRANSACTION_ID: transactionId,
+            },
             })
         );
 
