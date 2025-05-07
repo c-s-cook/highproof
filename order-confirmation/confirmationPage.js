@@ -12,7 +12,7 @@ if(!queryParams.has("order_id")){
     console.log('TRANSACTION_ID dev default = ', TRANSACTION_ID);
 } else {
     TRANSACTION_ID = queryParams.get("order_id");
-    console.log('TRANSACTION_ID = ',TRANSACTION_ID)
+    console.log('TRANSACTION_ID = ',TRANSACTION_ID);
 }
 
 
