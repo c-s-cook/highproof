@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <link rel="stylesheet" href="order-confirmation.css">
+    <!-- import order-confirmation.js -->
+    <script src="confirmationPage.js" defer></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+</head>
+<body>
+    <header>
+
+    </header>
+    <main>
+        <div id="loading-msg">Loading your tour info...</div>
+        <div id="order-confirmation-msg">
+            <!-- TOUR PARTIAL -->
+            <div class="tour-codes">
+                <p>You just purchased:</p>
+                <h3 class="title">TOUR TITLE HERE</h3>
+                <p class="voucher-code 1"><b>Tour Activation Code</b></p>
+                <h3 class="voucher-code" id="voucher-code-1">11111111</h3>
+                <p class="voucher-code 2 hidden"><b>Tour Activation Code 2 of 2</b></p>
+                <h3 class="voucher-code 2 hidden" id="voucher-code-2">22222222</h3>
+                <br/>
+                <p>Your Tour Activation Code, and the below instructions, have been sent to <span id="user-email">your email address</span>. </p>            
+            </div>
+            <!-- END TOUR PARTIAL -->
+            <!-- INSTRUCTIONS -->
+            <div class="instructions">
+                <h3>DOWNLOAD INSTRUCTIONS</h3>
+                <p>To access your tour, follow the steps below or <a href="..">watch this demo video</a>.</p>
+                <ol>
+                    <li>Download the VoiceMap App →   <a href="https://itunes.apple.com/us/app/voicemap/id852027939">iOS</a> | <a href="https://play.google.com/store/apps/details?id=me.voicemap.android">Android</a></li>
+                    <li>Sign up / Sign in</li>
+                    <li>Select the <b>“Tour Codes”</b> menu from the bottom navigation bar</li>
+                    <li>Select the <b>“Enter Codes”</b> tab in the top-right of the Tour Codes menu</li>
+                    <li>Paste in your activation code</li>
+                    <li>Hit <b>Submit</b></li>
+                    <li>Select the <b>“Library”</b> menu from the bottom navigation bar</li>
+                    <li>Click on your tour to open up the tour details</li>
+                    <li>Click the red <b>“Download”</b> button</li>
+                </ol>
+                <p class="note">(If you bought a two-part tour and have two codes, just repeat Steps 3 - 9.)</p>
+                <br>
+            </div>
+            <div class="content">
+                <p>Done! Now your tour is on your phone, ready to go, and you’ll be ready to make your 
+                    drive come alive whenever you finish up at <span id="starting-loc">the distillery</span>. Thank you so  
+                    much for choosing to make our tour a part of your Kentucky Bourbon Trail™ experience. </p>
+                <p>Here's to a trip you’ll talk about for years to come.</p>
+                <p>Cheers!</p>
+                
+                <p>-The High Proof Tours team</p>
+            </div>
+        </div>
+        <div id="error-msg" class="hidden">
+            <h3>Download instructions have been sent to your email address.</h3>
+            <p>If you don't receive an email from us within the next hour or two (including in your Span folders), 
+                please let us know by emailing us at <a href="mailto:contact@highproofproductions.com">contact@highproofproductions.com</a></p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 HighProof. All rights reserved.</p>
+    </footer>
+</body>
+</html>
