@@ -88,21 +88,39 @@ const checkAllConfirmed = () => {
 
 
 
-
-
-
 const handleNewTourTrue = (e) => {
    
     let i = e.target.dataset.tourIndex;
-    // console.log("Clicked, and found this array index: ",i)
-    // console.log("Tour Title in question is -> ", newTourTitles[i].TourTitle.TITLE)
+    let isPublished = false;
 
-    // console.log(document.querySelector(`.new-tour.checked, [data-tour-index="${i}"]`));
-    document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
-    e.target.disabled = true;
+    // confirm newTourTitle
+    let confirmNewTour = () => {
+        document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
+        e.target.disabled = true;
+        
+        newTourTitles[i].confirmed = true;
+        newTourTitles[i].published = isPublished;
+        togglePopUp();
+        document.getElementById("new-tour-is-published").display = "none";
+        checkAllConfirmed();
+
+    }
+
+    // POP-UP: check if the new tour is "Published" on VoiceMap...
+
+
     
-    newTourTitles[i].confirmed = true,
-    checkAllConfirmed();
+    
+    if(i) document.getElementById("is-published-tour-title").innerText = newTourTitles[i].TourTitle.TITLE;
+    
+    document.querySelector("#new-tour-is-published button.yes").addEventListener("click", () => {
+        isPublished = true;
+        confirmNewTour();
+    });
+
+    document.querySelector("#new-tour-is-published button.no").addEventListener("click", confirmNewTour);
+
+    togglePopUp();
 }
 
 
@@ -277,8 +295,6 @@ const handleExistingTourFalse = (e) => {
 
     let sbmtButton = document.querySelector('#existing-tour-false button');
 
-    sbmtButton.innerText += "??";
-
     sbmtButton.addEventListener('click', ()=> {
 
         errMessage.innerHTML = "";
@@ -393,9 +409,11 @@ function displayTourTitleResults() {
         document.getElementById('existing-tours').innerHTML = '';
 
         for (var et = 0; et < existingTourTitles.length; et++) {
+            let isPublished = existingTourTitles[et].published ? ' <span id="is-published">(published)</span>' : ''
+
             document.getElementById('existing-tours').innerHTML += `
                     <div class="tour-title-list">
-                        <div class="title"><span class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</span> ${existingTourTitles[et].TourTitle.TITLE}</div>
+                        <div class="title"><span class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</span> ${existingTourTitles[et].TourTitle.TITLE} ${isPublished}</div>
                         <div class="count">Count: ${existingTourTitles[et].TourTitle.COUNT}</div>
                         <div class="buttons">
                             <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
@@ -642,7 +660,7 @@ function actionCreateTours(){
     // list out any newTourTitles
         newTourTitles.map((tour) => {
             
-            toursList.innerHTML += `<li>KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
+            toursList.innerHTML += `<li class="new-tour" data-tour="${tour.tourNumber}">KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
         })
 
         // function for handling the button click to create tours in the database...
@@ -659,16 +677,20 @@ function actionCreateTours(){
                     body: JSON.stringify({
                         "TOUR_REGION": "KBT", // Using a fixed region for now...
                         "TOUR_NUM": newTourTitles[t].tourNumber,
-                        "TITLES": [newTourTitles[t].TourTitle.TITLE] // Assuming single title for new tours...
+                        "TITLES": [newTourTitles[t].TourTitle.TITLE], // Assuming single title for new tours...
+                        "VM_PUBLISHED": newTourTitles[t].published
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     console.log('Success:', data);
                     newTourTitles[t].createdInDB = true; // Mark this tour as created in the DB
+                    document.querySelector(`#tours-to-create>.tours-list>ul>li[data-tour="${newTourTitles[t].tourNumber}"]`).classList.add('success');
+                    createToursBtn.disabled = "true";
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                    document.querySelector(`#tours-to-create>.tours-list>ul>li[data-tour="${newTourTitles[t].tourNumber}"]`).classList.add('failure');
                 });
             }
         }
@@ -1064,7 +1086,8 @@ fileInput.addEventListener('change', async function (event) {
                 "allTitles": toursInDB[tourNumber].TITLES,
                 "tourNumber": toursInDB[tourNumber].TOUR_NUM,
                 "dbIndex": tourNumber,
-                "confirmed": false
+                "confirmed": false,
+                "published": toursInDB[tourNumber].VM_PUBLISHED
             });
         }
     }

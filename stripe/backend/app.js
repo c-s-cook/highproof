@@ -112,7 +112,7 @@ app.get('/api/vouchers/:VOUCHER_ID', async (req, res) => {
 //  API to get all items/tours in the TOURS table...
 app.get('/api/query-table', async (req, res) => {
   let response = await dynamo.getTours();
-  console.log("...in API...");
+  console.log("...in getTours() API...");
   console.log(response)
   res.json(response)
 });
@@ -121,11 +121,11 @@ app.get('/api/query-table', async (req, res) => {
 app.post('/api/create-tour', async (req, res) => {
   console.log("...in create-tour API...");
   console.log(req.body);
-  const { TOUR_REGION, TOUR_NUM, TITLES } = req.body;
-  console.log( TOUR_REGION, TOUR_NUM, TITLES )
+  const { TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED } = req.body;
+  console.log( TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED )
   try {
     // Call the function to create a new tour in the DynamoDB table
-    let response = await dynamo.createTour( TOUR_REGION, TOUR_NUM, TITLES );
+    let response = await dynamo.createTour( TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED );
     console.log(response);
     // Send a JSON response indicating success
     res.json({ success: true, message: "Tour created successfully!" });

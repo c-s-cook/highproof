@@ -148,8 +148,6 @@ div#input input[type="file"]{
 
 
 
-
-
 #existing-tour-false {
     text-align: center;
 }
@@ -168,6 +166,29 @@ div#input input[type="file"]{
 
 #existing-tour-false>#error>.warning{
     color: orange;
+}
+
+#is-published {
+    font-size: smaller;
+    font-weight: lighter;
+    font-style: italic;
+    float: right;
+    padding-right: 8px;
+    color: darkred;
+}
+
+#new-tour-is-published {
+    text-align: center;
+}
+
+#new-tour-is-published #is-published-tour-title {
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+#new-tour-is-published>div.buttons>button {
+    padding: 10px;
+    margin: 10px 10px;
 }
 
 
@@ -300,6 +321,22 @@ div#input input[type="file"]{
     margin-top: 0px;
 
 }
+
+
+#tours-to-create .tours-list ul li.success {
+    list-style: none;
+}
+#tours-to-create .tours-list ul li.success:before {
+    content: "\2705";  /*green-box with big white check*/
+}
+#tours-to-create .tours-list ul li.failure {
+    list-style: none;
+}
+#tours-to-create .tours-list ul li.failure:before {
+    content: "\274C";  /*red cross-mark*/
+}
+
+
 
 #vouchers-to-update .voucher-list .results>div {
     display: flex;

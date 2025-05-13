@@ -28,6 +28,7 @@ interface Tour {
     TOUR_REGION: string;
     TOUR_NUM: number;
     TITLES: string[];
+    VM_PUBLISHED: boolean;
 }
 
 interface Voucher {
@@ -58,7 +59,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 // ****************
 
 
-const createTour = async (tourRegion: string, tourNumber: number, titles: string[]) => {
+const createTour = async (tourRegion: string, tourNumber: number, titles: string[], published: boolean) => {
     console.log("in dynamo.ts createTour()...")
     console.log(tourRegion, typeof tourRegion, tourNumber, typeof tourNumber, titles)
     const command = new PutCommand({
@@ -67,6 +68,8 @@ const createTour = async (tourRegion: string, tourNumber: number, titles: string
             TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
             TOUR_NUM: tourNumber, 
             TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
+            VM_PUBLISHED: published,    // has the tour been "Published" on VoiceMap? If so the "Title" can change, 
+                                        // but the URL-string will be locked at time of publishing, so that will not need to be updated
         },
     });
 
