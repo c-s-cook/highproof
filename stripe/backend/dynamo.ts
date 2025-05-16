@@ -159,7 +159,7 @@ const createVoucher = async (voucher: Voucher) => {
     try {
         const response = await docClient.send(command);
         console.log("Voucher created successfully");
-        console.log(response);
+        // console.log(response);
         return response;
     } catch (error) {
         console.error("Error creating voucher:", error);
@@ -220,17 +220,55 @@ const getVoucherById = async (voucherId: string) => {
 
 // retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
 const getMostRecentVoucher = async () => {
-    const command = new ScanCommand({
+
+
+    /*
+    * *************DOESN'T WORK*************
+    *
+    * the ScanCommand doesn't seem to work. It doesn't
+    * return the most recent voucher. It returns a random
+    * voucher.
+    * 
+    * When trying to use a QueryCommand, with a >= or any 
+    * ranged operator I get the error: "Query key condition not supported"
+    * 
+    *   
+    */
+    // console.log("voucherTable = ", voucherTable);
+    // const command = new ScanCommand({
+    //     TableName: voucherTable,
+    //     IndexName: "CreatedIndex",
+    //     ScanIndexForward: false,  // This sorts in descending order (newest first)
+    //     Limit: 1  // This gets only the first (newest) item 
+    // });
+    // 
+    // const command = new QueryCommand({
+    //     TableName: voucherTable,
+    //     IndexName: "CreatedIndex",
+    //     KeyConditionExpression: "CREATED >= :minValue",
+    //     ExpressionAttributeValues: {
+    //         ":minValue": 0  // This will match all CREATED values
+    //     },
+    //     ScanIndexForward: false,  // This sorts in descending order (newest first)
+    //     Limit: 1  // This gets only the first (newest) item
+    // });
+
+
+    // a DynamoDBDocumentClient QueryCommand to find the voucher with VOUCHER_ID of "0000_MOST_RECENT"
+    const command = new QueryCommand({
         TableName: voucherTable,
-        IndexName: "CreatedIndex",
-        ScanIndexForward: false,  // This sorts in descending order (newest first)
-        Limit: 1  // This gets only the first (newest) item    
+        KeyConditionExpression: "VOUCHER_ID = :voucherId",
+        ExpressionAttributeValues: {
+            ":voucherId": "0000_MOST_RECENT"
+        }
     });
+
 
     try {
         const response = await docClient.send(command);
         if (response.Items && response.Items.length > 0) {
             console.log("Most recent voucher retrieved successfully");
+            // console.log(response);
             console.log(response.Items[0]);
             return response.Items[0];
         } else {
@@ -242,6 +280,41 @@ const getMostRecentVoucher = async () => {
         throw error;
     }
 }
+
+// this function updates the CREATED value of the 0000_MOST_RECENT voucher in the VM_VOUCHER_CODES table...
+const updateMostRecentVoucher = async (newCreatedValue: number) => {
+
+    console.log("in dynamo.js updateMostRecentVoucher()...");
+
+    newCreatedValue = Number(newCreatedValue);
+    if (isNaN(newCreatedValue)) {
+        console.error("Invalid/NaN newCreatedValue:", newCreatedValue);
+        throw new Error("Not a valid number");
+    }
+
+    const command = new UpdateCommand({
+        TableName: voucherTable,
+        Key: {
+            VOUCHER_ID: "0000_MOST_RECENT",
+        },
+        UpdateExpression: "SET CREATED = :newCreatedValue",
+        ExpressionAttributeValues: {
+            ":newCreatedValue": newCreatedValue,
+        },
+        ReturnValues: "ALL_NEW", // Returns the updated item
+    });
+
+    try {
+        const response = await docClient.send(command);
+        console.log("0000_MOST_RECENT voucher CREATED updated successfully");
+        // console.log(response);
+        return response;
+    } catch (error) {
+        console.error("Error updating 0000_MOST_RECENT voucher:", error);
+        throw error;
+    }
+}
+
 
 
 
@@ -291,5 +364,6 @@ module.exports = {
     getVouchersByTour,
     getVoucherById,
     getMostRecentVoucher,
+    updateMostRecentVoucher,
     updateVoucherLink
 };

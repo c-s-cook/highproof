@@ -824,6 +824,26 @@ function  actionCreateVouchers(){
         console.log("Creating Vouchers in DB...")
         console.log(vouchers)
         
+        //  update the CREATED attribute of the 0000_MOST_RECENT voucher in DB...
+        let mostRecentCreated;
+        const updateMostRecentVoucher = async (newMostRecent) => {
+            try {
+                let response = await fetch(`api/update-latest-voucher/${newMostRecent}`);
+
+                if (!response.ok) throw new Error(`Error updating 0000_MOST_RECENT voucher to ${newMostRecent}: ${response}`);
+
+                const data = await response.json();
+                
+                return data.voucher.CREATED;
+                
+            } catch (error) {
+                console.error('Errps:', error);
+                return null;
+            }
+            
+
+        }
+
 
         for (let v = 0; v < vouchers.length; v++){
 
@@ -848,6 +868,12 @@ function  actionCreateVouchers(){
                 console.error('Error:', error);
                 vouchers[v].dbStatus = "upload-error"; // Mark this voucher as attempted, but errored
             });
+
+            // call method to update 0000_MOST_RECENT
+            if ((!mostRecentCreated && vouchers[v].dbStatus == "uploaded-successfully") || (mostRecentCreated < new Date(vouchers[v].CREATED).valueOf())) {
+                
+                mostRecentCreated = await updateMostRecentVoucher(new Date(vouchers[v].CREATED).valueOf());
+            }
             displayVouchers();
         }
         
@@ -894,7 +920,7 @@ function  actionCreateVouchers(){
 
     const checkForVoucherInDB = async () => {
 
-        // Get One (most recent) voucher from DB...
+        // Get the 0000_MOST_RECENT voucher from DB...
         // API returns an object with "success:" and "voucher:" elements
         let latestDbVoucher
         try {
@@ -913,6 +939,8 @@ function  actionCreateVouchers(){
         if(latestDbVoucher){
             // Test it's voucher code + creation Data against current CSV vouchers...
             for (let v = 0; v < vouchers.length; v++){
+                // console.log(new Date(vouchers[v].CREATED), ' > ', new Date(latestDbVoucher.CREATED), ' ? : ', (new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)));
+
                 if(new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)) {
                     // add nothing. element's abscense will be the key
                     console.log("this voucher was newer")

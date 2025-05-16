@@ -336,6 +336,9 @@ div#input input[type="file"]{
     content: "\274C";  /*red cross-mark*/
 }
 
+#tours-to-create>.tours-list>ul>li[data-tour="7"]{
+
+}
 
 
 #vouchers-to-update .voucher-list .results>div {

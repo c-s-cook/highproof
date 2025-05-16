@@ -43,8 +43,8 @@ app.post('/api/add-voucher', async (req, res) => {
   let voucher = req.body;
   try {
     let response = await dynamo.createVoucher(voucher);
-    console.log(response);
-    res.json({ success: true, message: "Voucher added successfully!" });
+    // console.log(response);
+    res.json({ success: true, message: `Voucher ${voucher.VOUCHER_ID} added successfully!` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Failed to add voucher." });
@@ -68,7 +68,7 @@ app.get('/api/tour-vouchers/:TOUR_NUM', async (req, res) => {
 });
 
 
-// API to get the most recent voucher in the VM_VOUCHER_CODES table...
+// API to get the 0000_MOST_RECENT voucher in the VM_VOUCHER_CODES table...
 app.get('/api/get-latest-voucher', async (req, res) => {
   console.log("...in get-latest-voucher API...");
   try {
@@ -83,6 +83,21 @@ app.get('/api/get-latest-voucher', async (req, res) => {
   }
 });
 
+// API to update the CREATED value of the 0000_MOST_RECENT voucher...
+app.get('/api/update-latest-voucher/:CREATED', async (req, res) => {
+  console.log("...in update-latest-voucher API...");
+  const { CREATED } = req.params;
+  // console.log('CREATED = ', CREATED);
+  try {
+    let response = await dynamo.updateMostRecentVoucher(CREATED);
+    console.log('updateLatestVoucher response: ', response);
+    res.json({ success: true, voucher: response.Attributes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to update 0000_MOST_RECENT." });
+  }
+})
+
 
 
 
@@ -93,7 +108,7 @@ app.get('/api/vouchers/:VOUCHER_ID', async (req, res) => {
   try {
     // Call the function to get vouchers for the specified TOUR_NUM from the DynamoDB table
     let response = await dynamo.getVoucherById(VOUCHER_ID);
-    console.log("from app.js -", response);
+    // console.log("from app.js -", response);
     // Send a JSON response with the retrieved voucher
     res.json({ success: true, voucher: response });
   } catch (error) {
