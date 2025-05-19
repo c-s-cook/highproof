@@ -4,6 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+let dotenv = require('dotenv');
+dotenv.config();
+let isDev = process.env.IS_DEV == 'true' ? true : false;
+
 var dynamo = require('./dynamo')
 
 
@@ -23,8 +27,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/', indexRouter);
-app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers' }));
+app.use('/', (req, res, next) => {
+  // Attach variables to res.locals so they're available in all views
+  res.locals.isDev = isDev;
+  // Add more variables as needed, e.g.:
+  // res.locals.someVar = someValue;
+  next();
+}, indexRouter);
+app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers', isDev: isDev }));
 app.get('/vouchers', (req, res) => res.render('vouchers', { title: 'Vouchers' }));
 app.get('/customers', (req, res) => res.render('customers', { title: 'Customers' }));
 app.get('/tours', (req, res) => res.render('tours', { title: 'Tours' }));

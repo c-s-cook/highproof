@@ -5,5 +5,7 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <header class="dev-mode">IN TEST / DEV MODE</header>
+    <% if (isDev) { %>
+      <header class="dev-mode">IN TEST / DEV MODE</header>
+    <% } %>
     <img src="https://highproofproductions.com/wp-content/uploads/high-proof-productions-logo-ring-background_light-1-150x150.png" id="header-logo" alt="">

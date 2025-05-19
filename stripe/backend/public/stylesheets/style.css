@@ -13,6 +13,9 @@ body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   background-color: var(--hpp-orange);
+  background: radial-gradient(at top left, var(--hpp-orange) 0%, var(--dark) 100%);
+  background-attachment: fixed;
+  background-size: 100% 100%;
   text-align: center;
   color: white;
 }
