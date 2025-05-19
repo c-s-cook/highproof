@@ -390,7 +390,8 @@ function displayTourTitleResults() {
         for (var nt = 0; nt < newTourTitles.length; nt++) {
             document.getElementById('new-tours').innerHTML += `
                 <div class="tour-title-list">
-                        <div class="title"><span class="new-tour checked ${nt}" data-tour-index="${nt}" style="visibility:hidden">&#9989</span> ${newTourTitles[nt].TourTitle.TITLE} </div>
+                        <div class="new-tour checked ${nt}" data-tour-index="${nt}" style="visibility:hidden">&#9989</div>
+                        <div class="title"> ${newTourTitles[nt].TourTitle.TITLE} </div>
                         <div class="count">Count: ${newTourTitles[nt].TourTitle.COUNT}</div>
                         <div class="buttons">
                             <button class="new-tour true ${nt}" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
@@ -409,16 +410,18 @@ function displayTourTitleResults() {
         document.getElementById('existing-tours').innerHTML = '';
 
         for (var et = 0; et < existingTourTitles.length; et++) {
-            let isPublished = existingTourTitles[et].published ? ' <span id="is-published">(published)</span>' : ''
+            let isPublished = existingTourTitles[et].published ? ' <div><span id="is-published">(published)</span></div>' : ''
 
             document.getElementById('existing-tours').innerHTML += `
                     <div class="tour-title-list">
-                        <div class="title"><span class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</span> ${existingTourTitles[et].TourTitle.TITLE} ${isPublished}</div>
+                        <div class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</div>
+                        <div class="title"> ${existingTourTitles[et].TourTitle.TITLE}</div>
+                         ${isPublished}
                         <div class="count">Count: ${existingTourTitles[et].TourTitle.COUNT}</div>
                         <div class="buttons">
-                            <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
-                            <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
-                            <button class="existing-tour false ${et}" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, this is a new tour</button>
+                            <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Correct</button>
+                            <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">This is a different tour</button>
+                            <button class="existing-tour false ${et}" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, it's a new tour</button>
                         </div>
                     
                         
@@ -491,6 +494,7 @@ function displayVouchers(){
     console.log("in displayVouchers()")
 
     let results = document.getElementById('voucher-results')
+    results.style.display = "block";
     let table = document.getElementById('voucher-body')
     table.innerHTML = ''
 

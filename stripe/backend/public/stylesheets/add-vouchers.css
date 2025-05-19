@@ -1,13 +1,47 @@
 
+
+:root {
+    --box-shadow: #3333337a 0px 0px 25px;
+    --border-radius: 15px;
+    --box-opacity: 0.9;
+}
+
+
 h1, h2 {
     text-align: center;
 }
 
+button {
+    padding: 10px;
+    border-radius: 10px;
+    color: var(--hpp-orange);
+    border: 1px solid var(--hpp-orange);
+    background-color: transparent;
+}
+button:hover {
+    background-color: var(--hpp-orange);
+    color: white;
+}
+
 div#input {
     text-align: center;
+    padding: 25px;
+}
+div#input>p {
+    margin: 0px;
+    
+    
 }
 div#input input[type="file"]{
     padding-left: 1em;
+    font-size: 1.2em;
+    font-weight: bolder;
+    margin-top: -50px;
+}
+
+.container.add {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 
@@ -16,8 +50,16 @@ div#input input[type="file"]{
 /**** TOUR TITLE STYLING ****/
 
 .tour-title-list {
-    display: block;
-    height: 2em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    min-height: 2em;
+    padding: 0.5em;
+
+}
+.tour-title-list .checked {
+    max-width: 2em;
+    border: 1px dotted orange;
 }
 .tour-title-list:hover{
     background-color: rgb(232, 232, 232);
@@ -25,7 +67,7 @@ div#input input[type="file"]{
 
 .tour-title-list .title {
     display: inline-block;
-    width: 40%;
+    width: 45%;
     font-weight: bolder;
 
 }
@@ -128,7 +170,14 @@ div#input input[type="file"]{
 
 #title-results {
     border: 1px solid gray;
+    color: var(--dark);
+    background-color: var(--light);
+    border-radius: 10px;
     padding: 2em;
+    text-align: left;
+    opacity: var(--box-opacity);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 #title-results h3 {
@@ -198,6 +247,15 @@ div#input input[type="file"]{
 
 #voucher-results{
     margin-top: 5em;
+    background-color: var(--light);
+    color: var(--dark);
+    padding: 2em;
+    /* border: 1px solid gray; */
+    /* border-radius: 10px; */
+    
+    opacity: var(--box-opacity);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 #voucher-table{
@@ -295,19 +353,30 @@ div#input input[type="file"]{
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
-    justify-content: space-between;
-    gap: 2em;
+    justify-content: space-around;
+    gap: 1em;
     margin-top: 4em;
+    padding: 2em;
+    background-color: var(--light);
+    
+    color: var(--dark);
+    /* border: 1px solid gray; */
+    text-align: left;
+    opacity: var(--box-opacity);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 #action-items>h2{
     width: 100%;
     text-align: center;
+    font-size: 1.5em;
 }
 
 #action-items>div{
-    width: 45%;
-    min-width: 300px;
+    margin: 0px;
+    width: 44%;
+    min-width: 250px;
     border: 1px solid gray;
     min-height: 100px;
     padding: 2em;

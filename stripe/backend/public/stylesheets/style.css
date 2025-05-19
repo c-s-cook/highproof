@@ -1,6 +1,45 @@
+:root {
+  --hpp-orange: #f05624;
+  --light: #f0f0f0;
+  --dark: #333;
+  --link-color: #00B7FF;
+  --button-color: #ccc;
+  --button-hover-color: black;
+}
+
+
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: var(--hpp-orange);
+  text-align: center;
+  color: white;
+}
+
+header.dev-mode {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: white;
+  color: red;
+  font-size: 1.2em;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  padding: 10px 0;
+  border-top: 3px solid red;
+  border-radius: 0 0 10px 10px;
+  box-shadow: #333 0px 2px 5px;
+  
+}
+
+#header-logo {
+  width: 100px;
+  height: 100px;
+  margin: 25px auto;
+  margin: auto;
 }
 
 a {
@@ -9,22 +48,43 @@ a {
 
 
 a.button {
-  color: #474747;
+  color: var(--hpp-orange);
   text-decoration: none;
-  border: 1px solid #757575;
+  /* border: 1px solid #757575; */
   border-radius: 10px;
-  padding: 1em;
-  background-color: #ccc;
+  padding: 1em 2em;
+  background-color: var(--light);
+  font-size: 1.2em;
+  font-weight: bold;
+  text-transform: uppercase;
   margin: 0.5em;
+  box-shadow: #333 2px 2px 5px;
+  transition: all 0.3s ease;
 }
 
 a.button:hover {
   color: black;
-  border: 1px solid black;
-  text-decoration: underline;
+  
+  box-shadow: #333 4px 4px 5px;
+  /* border: 1px solid black; */
+  
 }
 
 a.button.add {
-  background-color: rgb(187, 103, 103);
+  /* background-color: rgb(187, 103, 103); */
+  border: 3px solid var(--dark);
+  color: var(--dark);
+}
+a.button.add:hover {
+  color: var(--hpp-orange);
+  border: 6px solid var(--dark);
+}
 
+
+/* INDEX - ADMIN OPTIONS */
+#admin-options {
+  display: block;
+  margin-top: 50px;
+  /* border: 1px solid #333; */
+  line-height: 6em;
 }

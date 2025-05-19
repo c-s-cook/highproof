@@ -3,9 +3,12 @@
 
     <h1><%= title %></h1>
     
-    <div id="admin-options">
+    <div class="container add">
       <div id="input">
-        <p>Select CSV File: <input type="file" id="fileInput" accept=".csv" /></p>
+        <p>Select the Voucher CSV File:
+
+         <input type="file" id="fileInput" accept=".csv" />
+        </p>
       </div>
 
 
@@ -23,30 +26,6 @@
           <div id="new-tours"></div>
         </div>
       </div>
-
-      <!-- VOUCHER TABLE -->
-      <div id="voucher-results" style="display: block;">
-        <h2>VOUCHERS</h2>
-        <pre id="output"></pre>
-        <table id="voucher-table">
-          <thead>
-            <tr>
-              <th class="voucher-th status"></th>
-              <th class="voucher-th id">ID</th>
-              <th class="voucher-th tour-id">TOUR</th>
-              <th class="voucher-th title">TITLE</th>
-              <th class="voucher-th redeemed">REDEEMED</th>
-              <th class="voucher-th available">AVAILABLE</th>
-              <th class="voucher-th link">LINK</th>
-              <th class="voucher-th created">CREATED</th>
-            </tr>
-          </thead>
-          <tbody id="voucher-body">
-
-          </tbody>
-        </table>
-      </div>
-      <!-- END   VOUCHER TABLE -->
 
 
       <!-- ACTION ITEMS -->
@@ -118,6 +97,32 @@
 
       </div>
       <!-- END   ACTION ITEMS -->
+
+      
+
+      <!-- VOUCHER TABLE -->
+      <div id="voucher-results" style="display: none;">
+        <h2>VOUCHERS</h2>
+        <pre id="output"></pre>
+        <table id="voucher-table">
+          <thead>
+            <tr>
+              <th class="voucher-th status"></th>
+              <th class="voucher-th id">ID</th>
+              <th class="voucher-th tour-id">TOUR</th>
+              <th class="voucher-th title">TITLE</th>
+              <th class="voucher-th redeemed">REDEEMED</th>
+              <th class="voucher-th available">AVAILABLE</th>
+              <th class="voucher-th link">LINK</th>
+              <th class="voucher-th created">CREATED</th>
+            </tr>
+          </thead>
+          <tbody id="voucher-body">
+
+          </tbody>
+        </table>
+      </div>
+      <!-- END   VOUCHER TABLE -->
 
 
 
