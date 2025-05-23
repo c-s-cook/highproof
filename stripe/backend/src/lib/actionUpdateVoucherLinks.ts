@@ -104,3 +104,50 @@ export function actionUpdateVoucherLinks(){
         document.getElementById('vouchers-to-update')!.style.color = "lightgray"
     }
 }
+
+
+
+
+
+
+
+
+// should not ever need to use this on a newly-imported voucher CSV
+function updateVoucherTitle(ogTitle: string, newTitle: string) {
+    // update voucher.Title
+    for(let v = 0; v < vouchers.length; v++){
+        if(ogTitle == vouchers[v].TourTitle) vouchers[v].TourTitle = newTitle
+    }
+}
+
+
+
+// ...actually, should not ever need to use this at this stage
+// ...it would likely mess things up way too much
+function updateVoucherLinks(ogTitle: string, newTitle: string, ogLink: string){
+
+    // this function should only be run AFTER the voucher's .TourTitle has been updated with the New Title
+
+    if(!ogTitle || !newTitle || !ogLink) {
+        console.log("updateVoucherLinks() ERROR --> Missing at least one param")
+        return
+    } 
+
+    let ogLinkTitle = ogTitle.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
+    console.log(ogTitle);
+
+    let newLinkTitle = newTitle.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
+    console.log(newTitle);
+
+    let splitLink = ogLink.split(ogTitle)
+    let newLink = `${splitLink[0]}${newTitle}${splitLink[1]}`
+
+    console.log(`Initial link is --> ${ogLink}`)
+    console.log(`New link is     --> ${newLink}`)
+
+    for(let v = 0; v < vouchers.length; v++){
+        if(newTitle == vouchers[v].TourTitle && ogLink == vouchers[v].LINK){
+            vouchers[v].LINK = newLink
+        }
+    }
+}
