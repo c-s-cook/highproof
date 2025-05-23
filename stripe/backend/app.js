@@ -12,6 +12,10 @@ var dynamo = require('./dynamo')
 
 
 var indexRouter = require('./routes/index');
+var viewVouchersRouter = require('./routes/viewVouchers');
+var viewToursRouter = require('./routes/viewTours');
+var viewCustomersRouther = require('./routes/viewCustomers');
+var viewTransactionsRouter = require('./routes/viewTransactions');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -28,18 +32,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/', (req, res, next) => {
-  // Attach variables to res.locals so they're available in all views
+  // Attach isDev variable to res.locals so they're available in view
   res.locals.isDev = isDev;
-  // Add more variables as needed, e.g.:
-  // res.locals.someVar = someValue;
   next();
 }, indexRouter);
-app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers', isDev: isDev }));
-app.get('/vouchers', (req, res) => res.render('vouchers', { title: 'Vouchers' }));
-app.get('/customers', (req, res) => res.render('customers', { title: 'Customers' }));
-app.get('/tours', (req, res) => res.render('tours', { title: 'Tours' }));
-app.get('/transactions', (req, res) => res.render('transactions', { title: 'Transactions' }));
 
+
+app.get('/vouchers/:voucherId?', (req, res, next)  => {
+  // Attach isDev variable to res.locals so they're available in view
+  res.locals.isDev = isDev;
+  next();
+}, viewVouchersRouter);
+
+app.get('/tours', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewToursRouter);
+
+app.get('/customers/:customerId?', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewCustomersRouther);
+
+app.get('/transactions/:transactionId?', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewTransactionsRouter);
+
+app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers', isDev: isDev }));
 
 
 // **************

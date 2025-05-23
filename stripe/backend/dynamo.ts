@@ -1,3 +1,5 @@
+import { get } from "http";
+
 // import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 let clientDynamodb = require('@aws-sdk/client-dynamodb');
 let DynamoDBClient = clientDynamodb.DynamoDBClient;
@@ -40,6 +42,30 @@ interface Voucher {
     REDEEMED: Boolean;
     PURCHASED?: number;     // new Date().valueOf() == ms as number
     TRANSACTION_ID?: string; // Foreign Key to Transactions Table
+}
+
+
+export interface Address {
+    city: string;
+    country: string;
+    line1: string;
+    line2?: string;
+    postal_code: string;
+    state: string;
+}
+
+export interface Customer {
+    CUSTOMER: string;       //  their email
+    NAME: string;
+    ADDRESS: Address;
+    TRANSACTIONS: string[];
+}
+
+export interface Transaction {
+    TRANSACTION_ID: string;     // the Checkout.session ID
+    CUSTOMER: string;           // their email | Foreign Key to CUSTOMERS table
+    VOUCHERS: string[];         // list of VOUCHER_ID strings
+    DATE: number;               // new Date().valueOf() == ms as number
 }
 
 
@@ -169,26 +195,35 @@ const createVoucher = async (voucher: Voucher) => {
 
 // Retreive vouchers by TOUR_NUM that are AVAILABLE...
 const getVouchersByTour = async (tourNum: number) => {
-    const command = new QueryCommand({
-        TableName: voucherTable,
-        IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
-        KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
-        ExpressionAttributeValues: {
-            ":tourNum": tourNum,
-            ":available": true,
-        },
-    });
+
+    const makeCommand = (isAvailable: boolean) => {
+        return new QueryCommand({
+            TableName: voucherTable,
+            IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
+            KeyConditionExpression: "TOUR_NUM = :tourNum",
+            // FilterExpression: "AVAILABLE = :available",
+            ExpressionAttributeValues: {
+                ":tourNum": tourNum,
+                // ":available": isAvailable,
+            },
+        });
+    }
+
+
+    let command = makeCommand(true);
 
     try {
         const response = await docClient.send(command);
         console.log("Vouchers retrieved successfully");
-        console.log(response.Items);
+        // console.log(response.Items);
+        console.log('\n\n\n\n');
         return response.Items;
     } catch (error) {
         console.error("Error retrieving vouchers:", error);
         throw error;
     }
 };
+// console.log(getVouchersByTour(1));
 
 
 // retreive a single voucher by VOUCHER_ID...
@@ -347,6 +382,110 @@ const updateVoucherLink = async (voucherId: string, newLink: string) => {
 
 
 
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+
+
+const getCustomerById = async (customerId: string) => {
+    const command = new GetCommand({
+        TableName: customerTable,
+        Key: {
+            CUSTOMER: customerId
+        }
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Item) {
+            console.log("Customer retrieved successfully");
+            console.log(response.Item);
+            return response.Item;
+        } else {
+            console.log("Customer not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving customer:", error);
+        throw error;
+    }
+}
+
+
+const getAllCustomers = async () => {
+    const command = new ScanCommand({
+        TableName: customerTable
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Items) {
+            console.log("Customers retrieved successfully. Count: ", response.Count);
+            // console.log(response.Items);
+            return response.Items;
+        } else {
+            console.log("No customers found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving customers:", error);
+        throw error;
+    }
+}
+
+
+
+
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+
+
+const getTransactionById = async (transactionId: string) => {
+    const command = new GetCommand({
+        TableName: transactionTable,
+        Key: {
+            TRANSACTION_ID: transactionId
+        }
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Item) {
+            console.log("Transaction retrieved successfully");
+            console.log(response.Item);
+            return response.Item;
+        } else {
+            console.log("Transaction not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving transaction:", error);
+        throw error;
+    }
+}
+
+const getAllTransactions = async () => {
+    const command = new ScanCommand({
+        TableName: transactionTable
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Items) {
+            console.log("Transactions retrieved successfully. Count: ", response.Count);
+            console.log(response.Items);
+            return response.Items;
+        } else {
+            console.log("No transactions found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving transactions:", error);
+        throw error;
+    }
+}
+
 
 
 
@@ -365,5 +504,9 @@ module.exports = {
     getVoucherById,
     getMostRecentVoucher,
     updateMostRecentVoucher,
-    updateVoucherLink
+    updateVoucherLink,
+    getCustomerById,
+    getAllCustomers,
+    getTransactionById,
+    getAllTransactions,
 };

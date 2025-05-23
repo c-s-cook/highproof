@@ -3,8 +3,53 @@
 
     <h1><%= title %></h1>
     <p>Customer table below...</p>
-    <div id="admin-options">
+    <div id="customers-table">
 
+        <h2>CUSTOMERS</h2>
+        <p>Here's the customer list...</p>
+        <table id="customers-list-table" class="table table-striped table-bordered table-hover" style="color:black;">
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>EMAIL</th>
+                    <th>ADDRESS</th>
+                    <th>TRANSATIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% customers.forEach(function(customer) { %>
+                    <tr>
+                        <td><%= customer.NAME %></td>
+                        <td><%= customer.CUSTOMER %></td>
+                        <td>
+                            <%= customer.ADDRESS.line1 %>,<br/> 
+                            <% if (customer.ADDRESS.line2) { %>
+                                <%= customer.ADDRESS.line2 %>,<br/>
+                            <% } %>
+                            <%= customer.ADDRESS.city %>, <%= customer.ADDRESS.state %> <%= customer.ADDRESS.postal_code %>
+                        </td>
+                        <td>
+                            <% customer.TRANSACTIONS.forEach(function(transaction) { %>
+                                <p><a href="../transactions/<%= transaction %>"><%= transaction %></a></p>
+                            <% }); %>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+
+        <!-- Include the DataTables JS and CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+        <!-- Initialize DataTable -->
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#customers-list-table').DataTable();
+            });
+        </script>
       
     </div>
 
