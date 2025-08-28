@@ -4,11 +4,13 @@ import  { getTourVoucher, updateVoucher, findCustomer, createCustomer, updateCus
 import { emailCustomerCodes, emailCustomerPending, emailAdmin } from './sendEmail.mjs';
 
 let isDev = process.env.IS_DEV == 'true' ? true : false;
-let isLocal = process.env.IS_LOCAL == 'true' ? true : false;
+
 
 let stripeSecretKey = isDev ? process.env.STRIPE_SECRET_KEY_TEST : process.env.STRIPE_SECRET_KEY;
 let stripeWebhookSecret = isDev ? process.env.STRIPE_WEBHOOK_SECRET_TEST : process.env.STRIPE_WEBHOOK_SECRET;
-let checkoutSessionID = isLocal ? 'cs_test_b1e6LTtHiVtuV1KwxEE4HNQHfaDqltC0vdNM9XzmyQKfiTI4RBg1Bg8RcK' : null;
+
+// let isLocal = process.env.IS_LOCAL == 'true' ? true : false;
+// let checkoutSessionID = isLocal ? 'cs_test_b1e6LTtHiVtuV1KwxEE4HNQHfaDqltC0vdNM9XzmyQKfiTI4RBg1Bg8RcK' : null;
 
 
 const stripe = stripePackage(stripeSecretKey);  // Replace with your Stripe secret key
@@ -32,10 +34,10 @@ const getTransactionDetails = async (csID = checkoutSessionID) => {
 
 
 const runDynamoActions = async (stripeEvent) => {
-    checkoutSessionID = stripeEvent.data.object.id ? stripeEvent.data.object.id : checkoutSessionID;
+    // checkoutSessionID = stripeEvent.data.object.id ? stripeEvent.data.object.id : checkoutSessionID;
+    let checkoutSessionID = stripeEvent.data.object.id;
     let purchaseInfo = await getTransactionDetails(checkoutSessionID)
     console.log('purchaseInfo = ', purchaseInfo);
-    // purchaseInfo.tourTitle = '{The Tour Title}'
 
     let vouchers = [];
     let voucherWarnings = [];
@@ -183,7 +185,7 @@ export const handler = async (event) => {
     console.log('event.body.type = ', event.body.type);
     if (event.body.type != 'checkout.session.completed') {
         console.log("exiting the script since it wasn't a checkout.session.completed event.")
-        return  { statusCode: 200, body: 'Got it, but only running the script for checkout.session.completed. So this is the end.' };
+        return  { statusCode: 200, body: `Got it, but only running the script for checkout.session.completed. So this is the end. And, IS_DEV = ${IS_DEV}` };
     } 
     
     const sig = event.headers['Stripe-Signature'];
