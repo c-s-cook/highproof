@@ -126,7 +126,7 @@ async function readCSVFile(file: File) {
                 "TRANSACTION_ID": null  //Str / Foreign Key
             }
             vouchers.push(voucher);
-            if (voucher.REDEEMED) availableVouchers.push(voucher);
+            if (!voucher.REDEEMED) availableVouchers.push(voucher);
 
             var foundIt = false;
             if (tourTitles.length > 0) {

@@ -10,7 +10,6 @@ let isDev = process.env.IS_DEV == 'true' ? true : false;
 
 var dynamo = require('./dynamo')
 
-
 var indexRouter = require('./routes/index');
 var viewVouchersRouter = require('./routes/viewVouchers');
 var viewToursRouter = require('./routes/viewTours');

@@ -165,6 +165,7 @@ export const handleNewTourTrue = (e: MouseEvent) => {
 
     // confirm newTourTitle
     let confirmNewTour = () => {
+        
         (document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`) as HTMLElement)!.style.visibility = "visible";
         (e.target as HTMLButtonElement).disabled = true;
         
@@ -185,7 +186,9 @@ export const handleNewTourTrue = (e: MouseEvent) => {
     });
 
     document.querySelector("#new-tour-is-published button.no")!.addEventListener("click", confirmNewTour);
-
+    
+    
+    (document.getElementById("new-tour-is-published") as HTMLElement)!.style.display = "block";
     togglePopUp();
 }
 

@@ -176,7 +176,9 @@ export function  actionCreateVouchers(){
         
         
 
-        //  Enable "Upload Vouchers" Btn 
+        //  Enable "Upload Vouchers" Btn
+        uploadVouchersBtn.disabled = false;
+        uploadVouchersBtn.addEventListener('click', uploadVouchersToDB);
 
     }
 
@@ -186,6 +188,7 @@ export function  actionCreateVouchers(){
     let checkDbVouchersBtn = document.querySelector('#vouchers-to-upload .check-db button') as HTMLButtonElement;
     checkDbVouchersBtn.addEventListener('click', checkForVoucherInDB);
     checkDbVouchersBtn.style.color = "blue";
+
     let uploadVouchersBtn = document.querySelector('#vouchers-to-upload .upload-to-db button') as HTMLButtonElement;
     uploadVouchersBtn.disabled = true;
 

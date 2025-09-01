@@ -107,7 +107,7 @@ function readCSVFile(file) {
                     "TRANSACTION_ID": null //Str / Foreign Key
                 };
                 vouchers.push(voucher);
-                if (voucher.REDEEMED)
+                if (!voucher.REDEEMED)
                     availableVouchers.push(voucher);
                 var foundIt = false;
                 if (tourTitles.length > 0) {
@@ -432,7 +432,9 @@ function actionCreateVouchers() {
         // listen for "deep check" click
         document.querySelector('#vouchers-to-upload .how-to-proceed button.deep-check').addEventListener('click', deepCheckAllVouchers);
         // Handle each choice + notate & display results
-        //  Enable "Upload Vouchers" Btn 
+        //  Enable "Upload Vouchers" Btn
+        uploadVouchersBtn.disabled = false;
+        uploadVouchersBtn.addEventListener('click', uploadVouchersToDB);
     });
     // need to find then activate the button...
     let checkDbVouchersBtn = document.querySelector('#vouchers-to-upload .check-db button');
@@ -1059,6 +1061,7 @@ const handleNewTourTrue = (e) => {
         confirmNewTour();
     });
     document.querySelector("#new-tour-is-published button.no").addEventListener("click", confirmNewTour);
+    document.getElementById("new-tour-is-published").style.display = "block";
     (0,_togglePopUp__WEBPACK_IMPORTED_MODULE_1__.togglePopUp)();
 };
 const handleNewTourFalseSelection = (e, tourDBNum, i, dbIndex, newOrExist) => __awaiter(void 0, void 0, void 0, function* () {
