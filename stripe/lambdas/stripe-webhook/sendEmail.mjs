@@ -111,9 +111,11 @@ export var emailCustomerCodes = function (emailInfo) { return __awaiter(void 0, 
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
+                console.log('starting emailCustomerCodes...');
                 return [4 /*yield*/, renderHTML(emailInfo, './email-templates/tmplt_confirmation.ejs')];
             case 1:
                 html = _a.sent();
+                console.log('Codes HTML received successfully:\n\n');
                 return [4 /*yield*/, transporter.sendMail({
                         from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
                         to: emailInfo.email,
@@ -140,9 +142,11 @@ export var emailCustomerPending = function (emailInfo) { return __awaiter(void 0
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
+                console.log('starting emailCustomerPending...');
                 return [4 /*yield*/, renderHTML(emailInfo, './email-templates/tmplt_pending.ejs')];
             case 1:
                 html = _a.sent();
+                console.log('Pending HTML received successfully:\n\n');
                 return [4 /*yield*/, transporter.sendMail({
                         from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
                         to: emailInfo.email,
@@ -164,26 +168,29 @@ export var emailCustomerPending = function (emailInfo) { return __awaiter(void 0
 }); };
 // send email to adminstrator when there's an issue
 export var emailAdmin = function (alertInfo) { return __awaiter(void 0, void 0, void 0, function () {
-    var info, error_4;
+    var devMsg, info, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
+                devMsg = process.env.IS_DEV ? '(dev)' : '!!';
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, transporter.sendMail({
                         from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
                         to: 'christopher@highproofproductions.com',
-                        subject: "!! Stripe/Voucher Issue !!  ".concat(alertInfo.subject),
+                        subject: "".concat(devMsg, " Stripe/Voucher Issue ").concat(devMsg, "  ").concat(alertInfo.subject),
                         text: JSON.stringify(alertInfo, null, 2), // plain text body
                     })];
-            case 1:
+            case 2:
                 info = _a.sent();
                 console.log('Admin message sent: %s', info.messageId);
                 return [2 /*return*/, { 'message': "Admin message successfully sent: ".concat(info.messageId) }];
-            case 2:
+            case 3:
                 error_4 = _a.sent();
                 console.error('Error sending admin email:', error_4);
                 return [2 /*return*/, { 'error': "Admin Message error: ".concat(error_4) }];
-            case 3: return [2 /*return*/];
+            case 4: return [2 /*return*/];
         }
     });
 }); };

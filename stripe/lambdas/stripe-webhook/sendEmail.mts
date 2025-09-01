@@ -78,6 +78,7 @@ export const renderHTML = async (emailInfo: EmailInfo, filePath: String) => {
 
 // email the customer their voucher codes + instructions
 export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
+
     try {
         console.log('starting emailCustomerCodes...');
         // render the HTML from the EJS template
@@ -132,13 +133,14 @@ export const emailCustomerPending = async (emailInfo: EmailInfo) => {
 // send email to adminstrator when there's an issue
 export const emailAdmin = async (alertInfo: any) => {
 
+    let devMsg = process.env.IS_DEV ? '(dev)' : '!!';
 
     try {
         // send mail with defined transport object
         const info = await transporter.sendMail({
             from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
             to: 'christopher@highproofproductions.com',
-            subject: `!! Stripe/Voucher Issue !!  ${alertInfo.subject}`, 
+            subject: `${devMsg} Stripe/Voucher Issue ${devMsg}  ${alertInfo.subject}`, 
             text: JSON.stringify(alertInfo, null, 2), // plain text body
         });
 
