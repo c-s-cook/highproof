@@ -3,7 +3,7 @@
 let  DEV_TRANSACTION_ID = 'cs_test_b1rz3tIUPyNp9XxFSn6YQuwmz9DA7DpHdBMp0IsdLH9DoCpJqG1JQIHJMv';
 
 let TRANSACTION_ID;
-let orderConfirmationAPI = 'https://cbvblxsbqbh6d36qogyygvmfhq0xcmdc.lambda-url.us-east-2.on.aws/';
+let orderConfirmationAPI = 'https://hsxr24i7msvrv6i7ecnpecg3iu0ageoi.lambda-url.us-east-2.on.aws/';
 
 let queryParams = new URLSearchParams(window.location.search)
 if(!queryParams.has("order_id")){
