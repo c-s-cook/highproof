@@ -42,8 +42,8 @@ A full-featured Express.js web application serving as the control center for the
 
 ---
 
-### 2. **Stripe Lambda - Payment Processing & Fulfillment**
-**Directory:** `stripe/stripe-lambda/`
+### 2. **Stripe Webhook - Payment Processing & Fulfillment**
+**Directory:** `stripe/lambdas/stripe-webhook/`
 
 A stateless, event-driven AWS Lambda function that executes immediately upon Stripe payment completion.
 
@@ -79,7 +79,7 @@ A stateless, event-driven AWS Lambda function that executes immediately upon Str
 ---
 
 ### 3. **Order Confirmation API - Public Query Interface**
-**Directory:** `stripe/order-confirmation-api/`
+**Directory:** `stripe/lambdas/order-confirmation-api/`
 
 A lightweight AWS Lambda API providing secure, public access to order details for use in external systems like WordPress confirmation pages.
 
@@ -119,7 +119,7 @@ A lightweight AWS Lambda API providing secure, public access to order details fo
          │ Payment Complete
          ▼
 ┌──────────────────────────┐
-│  Stripe Lambda Function  │
+│  Stripe Webhook Lambda   │
 │  (Webhook Handler)       │
 └────────┬─────────────────┘
          │
@@ -168,7 +168,8 @@ A lightweight AWS Lambda API providing secure, public access to order details fo
 - ✅ Type-safe database operations with TypeScript interfaces
 
 ### Serverless Architecture
-- ✅ AWS Lambda for event-driven microservices (no server management)
+- ✅ AWS Lambda functions for event-driven microservices (Stripe webhook and order confirmation API)
+- ✅ Event-driven architecture eliminating manual intervention in payment fulfillment
 - ✅ Automatic scaling for variable payment volumes
 - ✅ Cost-efficient pay-per-execution pricing model
 
@@ -207,20 +208,26 @@ stripe/
 │   ├── views/                   # EJS templates for dashboard pages
 │   └── bin/www                  # Server entry point
 │
-├── stripe-lambda/               # Payment Processing Lambda
-│   ├── index.mjs                # Lambda handler function
-│   ├── dynamo.mjs               # DynamoDB operations
-│   ├── sendEmail.mjs            # Email sending logic
-│   ├── types.mjs                # Type definitions (JSDoc)
-│   ├── email-templates/         # EJS email templates
-│   └── package.json             # Dependencies (Stripe, AWS SDK, Nodemailer)
+├── lambdas/                      # AWS Lambda Functions
+│   │
+│   ├── stripe-webhook/          # Payment Processing Lambda
+│   │   ├── index.mjs            # Lambda handler function
+│   │   ├── dynamo.mjs           # DynamoDB operations
+│   │   ├── sendEmail.mjs        # Email sending logic
+│   │   ├── types.mjs            # Type definitions (JSDoc)
+│   │   ├── email-templates/     # EJS email templates
+│   │   ├── package.json         # Dependencies (Stripe, AWS SDK, Nodemailer)
+│   │   ├── tsconfig.json        # TypeScript configuration
+│   │   └── ReadMe.md            # Stripe webhook documentation
+│   │
+│   └── order-confirmation-api/  # Public Query API Lambda
+│       ├── index.mjs            # Lambda handler for transaction queries
+│       ├── index.mjs.map        # Webpack source map
+│       ├── package.json         # Dependencies (AWS SDK)
+│       └── tsconfig.json        # TypeScript configuration
 │
-├── order-confirmation-api/      # Public Query API Lambda
-│   ├── index.mjs                # Lambda handler for transaction queries
-│   ├── package.json             # Minimal dependencies
-│   └── tsconfig.json            # TypeScript configuration
-│
-└── notes.md                      # Development notes & implementation details
+├── notes.md                      # Development notes & implementation details
+└── notes-DynamoDB.md            # DynamoDB schema documentation
 ```
 
 ---
