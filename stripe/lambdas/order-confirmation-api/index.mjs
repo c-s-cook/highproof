@@ -11,10 +11,20 @@ let isDev = process.env.IS_DEV == 'true' ? true : false;
 // let toursTable = isDev ? "TOURS_DEV" : "TOURS";
 // let voucherTable = isDev ? "VM_VOUCHER_CODES_DEV" : "VM_VOUCHER_CODES"
 // let customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS"
-let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS";
+// let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS"
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
 export const handler = async (event) => {
+    // read the origin header of the incoming lambda request
+    const headers = event.headers || {};
+    // Node/ApiGateway lower-cases header names; check common variants and proxies
+    const origin = headers.origin || headers.Origin || headers.referer || headers.Referer || headers['x-forwarded-host'] || headers['host'] || event.requestContext?.domainName || event.requestContext?.domain;
+    console.log(`Origin = ${origin}`);
+    let transactionTable = "TRANSACTIONS";
+    if (origin.includes('dev.highproofproductions'))
+        transactionTable = "TRANSACTIONS_DEV";
+    // else if (origin.includes('highproofproductions')) transactionTable = "TRANSACTIONS";
+    // else throw new Error(`Don't know this origin -> ${origin}`);
     try {
         const transactionId = event.queryStringParameters?.TRANSACTION_ID;
         if (!transactionId) {

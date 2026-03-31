@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -43,7 +44,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-var _this = this;
+Object.defineProperty(exports, "__esModule", { value: true });
 // import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 var clientDynamodb = require('@aws-sdk/client-dynamodb');
 var DynamoDBClient = clientDynamodb.DynamoDBClient;
@@ -69,7 +70,7 @@ var docClient = DynamoDBDocumentClient.from(client);
 // ****************
 //  TOUR MANAGEMENT
 // ****************
-var createTour = function (tourRegion, tourNumber, titles) { return __awaiter(_this, void 0, void 0, function () {
+var createTour = function (tourRegion, tourNumber, titles, published) { return __awaiter(void 0, void 0, void 0, function () {
     var command, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -82,6 +83,8 @@ var createTour = function (tourRegion, tourNumber, titles) { return __awaiter(_t
                         TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
                         TOUR_NUM: tourNumber,
                         TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
+                        VM_PUBLISHED: published, // has the tour been "Published" on VoiceMap? If so the "Title" can change, 
+                        // but the URL-string will be locked at time of publishing, so that will not need to be updated
                     },
                 });
                 return [4 /*yield*/, docClient.send(command)];
@@ -94,7 +97,7 @@ var createTour = function (tourRegion, tourNumber, titles) { return __awaiter(_t
     });
 }); };
 // Update a tour's TITLES in db...
-var updateTour = function (tourRegion, tourNumber, titles) { return __awaiter(_this, void 0, void 0, function () {
+var updateTour = function (tourRegion, tourNumber, titles) { return __awaiter(void 0, void 0, void 0, function () {
     var command, response, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -133,7 +136,7 @@ var getTours = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         args_1[_i] = arguments[_i];
     }
-    return __awaiter(_this, __spreadArray([], args_1, true), void 0, function (tourRegion) {
+    return __awaiter(void 0, __spreadArray([], args_1, true), void 0, function (tourRegion) {
         var command, response;
         if (tourRegion === void 0) { tourRegion = "KBT"; }
         return __generator(this, function (_a) {
@@ -155,7 +158,7 @@ var getTours = function () {
         });
     });
 };
-var scanTours = function () { return __awaiter(_this, void 0, void 0, function () {
+var scanTours = function () { return __awaiter(void 0, void 0, void 0, function () {
     var command, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -176,7 +179,7 @@ var scanTours = function () { return __awaiter(_this, void 0, void 0, function (
 //  VOUCHER MANAGEMENT
 // *******************
 // Create a new voucher in the VM_VOUCHER_CODES table...
-var createVoucher = function (voucher) { return __awaiter(_this, void 0, void 0, function () {
+var createVoucher = function (voucher) { return __awaiter(void 0, void 0, void 0, function () {
     var command, response, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -201,7 +204,7 @@ var createVoucher = function (voucher) { return __awaiter(_this, void 0, void 0,
             case 2:
                 response = _a.sent();
                 console.log("Voucher created successfully");
-                console.log(response);
+                // console.log(response);
                 return [2 /*return*/, response];
             case 3:
                 error_2 = _a.sent();
@@ -212,20 +215,24 @@ var createVoucher = function (voucher) { return __awaiter(_this, void 0, void 0,
     });
 }); };
 // Retreive vouchers by TOUR_NUM that are AVAILABLE...
-var getVouchersByTour = function (tourNum) { return __awaiter(_this, void 0, void 0, function () {
-    var command, response, error_3;
+var getVouchersByTour = function (tourNum) { return __awaiter(void 0, void 0, void 0, function () {
+    var makeCommand, command, response, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                command = new QueryCommand({
-                    TableName: voucherTable,
-                    IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
-                    KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
-                    ExpressionAttributeValues: {
-                        ":tourNum": tourNum,
-                        ":available": true,
-                    },
-                });
+                makeCommand = function (isAvailable) {
+                    return new QueryCommand({
+                        TableName: voucherTable,
+                        IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
+                        KeyConditionExpression: "TOUR_NUM = :tourNum",
+                        // FilterExpression: "AVAILABLE = :available",
+                        ExpressionAttributeValues: {
+                            ":tourNum": tourNum,
+                            // ":available": isAvailable,
+                        },
+                    });
+                };
+                command = makeCommand(true);
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
@@ -233,7 +240,8 @@ var getVouchersByTour = function (tourNum) { return __awaiter(_this, void 0, voi
             case 2:
                 response = _a.sent();
                 console.log("Vouchers retrieved successfully");
-                console.log(response.Items);
+                // console.log(response.Items);
+                console.log('\n\n\n\n');
                 return [2 /*return*/, response.Items];
             case 3:
                 error_3 = _a.sent();
@@ -243,8 +251,9 @@ var getVouchersByTour = function (tourNum) { return __awaiter(_this, void 0, voi
         }
     });
 }); };
+// console.log(getVouchersByTour(1));
 // retreive a single voucher by VOUCHER_ID...
-var getVoucherById = function (voucherId) { return __awaiter(_this, void 0, void 0, function () {
+var getVoucherById = function (voucherId) { return __awaiter(void 0, void 0, void 0, function () {
     var command, response, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -281,16 +290,17 @@ var getVoucherById = function (voucherId) { return __awaiter(_this, void 0, void
     });
 }); };
 // retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
-var getMostRecentVoucher = function () { return __awaiter(_this, void 0, void 0, function () {
+var getMostRecentVoucher = function () { return __awaiter(void 0, void 0, void 0, function () {
     var command, response, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                command = new ScanCommand({
+                command = new QueryCommand({
                     TableName: voucherTable,
-                    IndexName: "CreatedIndex",
-                    ScanIndexForward: false, // This sorts in descending order (newest first)
-                    Limit: 1 // This gets only the first (newest) item    
+                    KeyConditionExpression: "VOUCHER_ID = :voucherId",
+                    ExpressionAttributeValues: {
+                        ":voucherId": "0000_MOST_RECENT"
+                    }
                 });
                 _a.label = 1;
             case 1:
@@ -300,6 +310,7 @@ var getMostRecentVoucher = function () { return __awaiter(_this, void 0, void 0,
                 response = _a.sent();
                 if (response.Items && response.Items.length > 0) {
                     console.log("Most recent voucher retrieved successfully");
+                    // console.log(response);
                     console.log(response.Items[0]);
                     return [2 /*return*/, response.Items[0]];
                 }
@@ -316,9 +327,49 @@ var getMostRecentVoucher = function () { return __awaiter(_this, void 0, void 0,
         }
     });
 }); };
-// this function updates a voucher's LINK field in the VM_VOUCHER_CODES table...
-var updateVoucherLink = function (voucherId, newLink) { return __awaiter(_this, void 0, void 0, function () {
+// this function updates the CREATED value of the 0000_MOST_RECENT voucher in the VM_VOUCHER_CODES table...
+var updateMostRecentVoucher = function (newCreatedValue) { return __awaiter(void 0, void 0, void 0, function () {
     var command, response, error_6;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.log("in dynamo.js updateMostRecentVoucher()...");
+                newCreatedValue = Number(newCreatedValue);
+                if (isNaN(newCreatedValue)) {
+                    console.error("Invalid/NaN newCreatedValue:", newCreatedValue);
+                    throw new Error("Not a valid number");
+                }
+                command = new UpdateCommand({
+                    TableName: voucherTable,
+                    Key: {
+                        VOUCHER_ID: "0000_MOST_RECENT",
+                    },
+                    UpdateExpression: "SET CREATED = :newCreatedValue",
+                    ExpressionAttributeValues: {
+                        ":newCreatedValue": newCreatedValue,
+                    },
+                    ReturnValues: "ALL_NEW", // Returns the updated item
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, docClient.send(command)];
+            case 2:
+                response = _a.sent();
+                console.log("0000_MOST_RECENT voucher CREATED updated successfully");
+                // console.log(response);
+                return [2 /*return*/, response];
+            case 3:
+                error_6 = _a.sent();
+                console.error("Error updating 0000_MOST_RECENT voucher:", error_6);
+                throw error_6;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+// this function updates a voucher's LINK field in the VM_VOUCHER_CODES table...
+var updateVoucherLink = function (voucherId, newLink) { return __awaiter(void 0, void 0, void 0, function () {
+    var command, response, error_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -343,9 +394,149 @@ var updateVoucherLink = function (voucherId, newLink) { return __awaiter(_this, 
                 console.log(response);
                 return [2 /*return*/, response];
             case 3:
-                error_6 = _a.sent();
-                console.error("Error updating voucher link:", error_6);
-                throw error_6;
+                error_7 = _a.sent();
+                console.error("Error updating voucher link:", error_7);
+                throw error_7;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+var getCustomerById = function (customerId) { return __awaiter(void 0, void 0, void 0, function () {
+    var command, response, error_8;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                command = new GetCommand({
+                    TableName: customerTable,
+                    Key: {
+                        CUSTOMER: customerId
+                    }
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, docClient.send(command)];
+            case 2:
+                response = _a.sent();
+                if (response.Item) {
+                    console.log("Customer retrieved successfully");
+                    console.log(response.Item);
+                    return [2 /*return*/, response.Item];
+                }
+                else {
+                    console.log("Customer not found");
+                    return [2 /*return*/, null];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_8 = _a.sent();
+                console.error("Error retrieving customer:", error_8);
+                throw error_8;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var getAllCustomers = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var command, response, error_9;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                command = new ScanCommand({
+                    TableName: customerTable
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, docClient.send(command)];
+            case 2:
+                response = _a.sent();
+                if (response.Items) {
+                    console.log("Customers retrieved successfully. Count: ", response.Count);
+                    // console.log(response.Items);
+                    return [2 /*return*/, response.Items];
+                }
+                else {
+                    console.log("No customers found");
+                    return [2 /*return*/, null];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_9 = _a.sent();
+                console.error("Error retrieving customers:", error_9);
+                throw error_9;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+var getTransactionById = function (transactionId) { return __awaiter(void 0, void 0, void 0, function () {
+    var command, response, error_10;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                command = new GetCommand({
+                    TableName: transactionTable,
+                    Key: {
+                        TRANSACTION_ID: transactionId
+                    }
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, docClient.send(command)];
+            case 2:
+                response = _a.sent();
+                if (response.Item) {
+                    console.log("Transaction retrieved successfully");
+                    console.log(response.Item);
+                    return [2 /*return*/, response.Item];
+                }
+                else {
+                    console.log("Transaction not found");
+                    return [2 /*return*/, null];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_10 = _a.sent();
+                console.error("Error retrieving transaction:", error_10);
+                throw error_10;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var getAllTransactions = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var command, response, error_11;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                command = new ScanCommand({
+                    TableName: transactionTable
+                });
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, docClient.send(command)];
+            case 2:
+                response = _a.sent();
+                if (response.Items) {
+                    console.log("Transactions retrieved successfully. Count: ", response.Count);
+                    console.log(response.Items);
+                    return [2 /*return*/, response.Items];
+                }
+                else {
+                    console.log("No transactions found");
+                    return [2 /*return*/, null];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_11 = _a.sent();
+                console.error("Error retrieving transactions:", error_11);
+                throw error_11;
             case 4: return [2 /*return*/];
         }
     });
@@ -359,5 +550,10 @@ module.exports = {
     getVouchersByTour: getVouchersByTour,
     getVoucherById: getVoucherById,
     getMostRecentVoucher: getMostRecentVoucher,
-    updateVoucherLink: updateVoucherLink
+    updateMostRecentVoucher: updateMostRecentVoucher,
+    updateVoucherLink: updateVoucherLink,
+    getCustomerById: getCustomerById,
+    getAllCustomers: getAllCustomers,
+    getTransactionById: getTransactionById,
+    getAllTransactions: getAllTransactions,
 };

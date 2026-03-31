@@ -3,8 +3,43 @@
 
     <h1><%= title %></h1>
     <p>Here are the tours</p>
-    <div id="admin-options">
+    <div id="tour-table">
 
+        <h2>TOURS</h2>
+        <p>Here's the Voucher Count for each Tour...</p>
+        <table id="tours-count-table" class="table table-striped table-bordered table-hover" style="color:black;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ACTIVE TITLE</th>
+                    <th>AVAILABLE</th>
+                    <th>TOTAL COUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% tours.forEach(function(tour) { %>
+                    <tr>
+                        <td><%= tour.TOUR_NUM %></td>
+                        <td><%= tour.TITLES[0] %></td>
+                        <td><%= tour.AVAILABLE %></td>
+                        <td><%= tour.TOTAL %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+
+        <!-- Include the DataTables JS and CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+        <!-- Initialize DataTable -->
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#tours-count-table').DataTable();
+            });
+        </script>
       
     </div>
 

@@ -116,7 +116,7 @@ export async function getTourVoucher(tourNum: number): Promise<VoucherResult> {
             ":tourNum": tourNum,
             ":available": true,
         },
-        Limit: 10
+        Limit: 30
     };
 
     const runQueryCommand = async () => {

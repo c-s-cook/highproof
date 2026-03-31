@@ -3,8 +3,57 @@
 
     <h1><%= title %></h1>
     <p>Transactions...again</p>
-    <div id="admin-options">
+    <div id="transactions-table">
 
+        <h2>TRANSACTIONS</h2>
+        <p>Here's the customer list...</p>
+        <table id="transactions-list-table" class="table table-striped table-bordered table-hover" style="color:black;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>CUSTOMER</th>
+                    <th>DATE</th>
+                    <th>VOUCHER(S)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% transactions.forEach(function(transaction) { %>
+                    <tr>
+                        <td><%= transaction.TRANSACTION_ID %></td>
+                        <td><%= transaction.CUSTOMER %></td>
+                        <td><%= new Date(transaction.DATE) %></td>
+                        <td>
+                            <!-- an if statement to check to see if transation.VOUCHERS is an array with more than one item -->
+                            <% if (Array.isArray(transaction.VOUCHERS) && transaction.VOUCHERS.length > 1) { %>
+
+                                    <% transaction.VOUCHERS.forEach(function(voucher) { %>
+                                        <p><a href="../vouchers/<%= voucher %>"><%= voucher %></a></p>
+                                    <% }); %>
+
+                            <% } else if (Array.isArray(transaction.VOUCHERS) && transaction.VOUCHERS.length === 1) { %>
+                                <p><a href="../vouchers/<%= transaction.VOUCHERS[0] %>"><%= transaction.VOUCHERS[0] %></a></p>
+                            <% } else { %>
+                                <p><a href="../vouchers/<%= transaction.VOUCHERS %>"><%= transaction.VOUCHERS %></a></p>
+                            <% } %>
+
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+
+        <!-- Include the DataTables JS and CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+        <!-- Initialize DataTable -->
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#transactions-list-table').DataTable();
+            });
+        </script>
       
     </div>
 

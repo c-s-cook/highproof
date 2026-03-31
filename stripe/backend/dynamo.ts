@@ -1,3 +1,5 @@
+import { get } from "http";
+
 // import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 let clientDynamodb = require('@aws-sdk/client-dynamodb');
 let DynamoDBClient = clientDynamodb.DynamoDBClient;
@@ -28,6 +30,7 @@ interface Tour {
     TOUR_REGION: string;
     TOUR_NUM: number;
     TITLES: string[];
+    VM_PUBLISHED: boolean;
 }
 
 interface Voucher {
@@ -39,6 +42,30 @@ interface Voucher {
     REDEEMED: Boolean;
     PURCHASED?: number;     // new Date().valueOf() == ms as number
     TRANSACTION_ID?: string; // Foreign Key to Transactions Table
+}
+
+
+export interface Address {
+    city: string;
+    country: string;
+    line1: string;
+    line2?: string;
+    postal_code: string;
+    state: string;
+}
+
+export interface Customer {
+    CUSTOMER: string;       //  their email
+    NAME: string;
+    ADDRESS: Address;
+    TRANSACTIONS: string[];
+}
+
+export interface Transaction {
+    TRANSACTION_ID: string;     // the Checkout.session ID
+    CUSTOMER: string;           // their email | Foreign Key to CUSTOMERS table
+    VOUCHERS: string[];         // list of VOUCHER_ID strings
+    DATE: number;               // new Date().valueOf() == ms as number
 }
 
 
@@ -58,7 +85,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 // ****************
 
 
-const createTour = async (tourRegion: string, tourNumber: number, titles: string[]) => {
+const createTour = async (tourRegion: string, tourNumber: number, titles: string[], published: boolean) => {
     console.log("in dynamo.ts createTour()...")
     console.log(tourRegion, typeof tourRegion, tourNumber, typeof tourNumber, titles)
     const command = new PutCommand({
@@ -67,6 +94,8 @@ const createTour = async (tourRegion: string, tourNumber: number, titles: string
             TOUR_REGION: tourRegion, // e.g., "KBT" for Kentucky Bourbon Tour. Maybe, someday, NAPA for Napa Valley Tour, etc.
             TOUR_NUM: tourNumber, 
             TITLES: titles, // Array of titles for the tour. The current, "Active Title" should always be first / [0]
+            VM_PUBLISHED: published,    // has the tour been "Published" on VoiceMap? If so the "Title" can change, 
+                                        // but the URL-string will be locked at time of publishing, so that will not need to be updated
         },
     });
 
@@ -156,7 +185,7 @@ const createVoucher = async (voucher: Voucher) => {
     try {
         const response = await docClient.send(command);
         console.log("Voucher created successfully");
-        console.log(response);
+        // console.log(response);
         return response;
     } catch (error) {
         console.error("Error creating voucher:", error);
@@ -166,26 +195,35 @@ const createVoucher = async (voucher: Voucher) => {
 
 // Retreive vouchers by TOUR_NUM that are AVAILABLE...
 const getVouchersByTour = async (tourNum: number) => {
-    const command = new QueryCommand({
-        TableName: voucherTable,
-        IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
-        KeyConditionExpression: "TOUR_NUM = :tourNum AND AVAILABLE = :available",
-        ExpressionAttributeValues: {
-            ":tourNum": tourNum,
-            ":available": true,
-        },
-    });
+
+    const makeCommand = (isAvailable: boolean) => {
+        return new QueryCommand({
+            TableName: voucherTable,
+            IndexName: "TourNumIndex", // Assuming there's a GSI on TOUR_NUM
+            KeyConditionExpression: "TOUR_NUM = :tourNum",
+            // FilterExpression: "AVAILABLE = :available",
+            ExpressionAttributeValues: {
+                ":tourNum": tourNum,
+                // ":available": isAvailable,
+            },
+        });
+    }
+
+
+    let command = makeCommand(true);
 
     try {
         const response = await docClient.send(command);
         console.log("Vouchers retrieved successfully");
-        console.log(response.Items);
+        // console.log(response.Items);
+        console.log('\n\n\n\n');
         return response.Items;
     } catch (error) {
         console.error("Error retrieving vouchers:", error);
         throw error;
     }
 };
+// console.log(getVouchersByTour(1));
 
 
 // retreive a single voucher by VOUCHER_ID...
@@ -217,17 +255,55 @@ const getVoucherById = async (voucherId: string) => {
 
 // retreive most recently added voucher, which should be a voucher with the largest CREATED value in the VM_VOUCHER_TABLE. Query using a GSI on CREATED titled "CreatedIndex"...
 const getMostRecentVoucher = async () => {
-    const command = new ScanCommand({
+
+
+    /*
+    * *************DOESN'T WORK*************
+    *
+    * the ScanCommand doesn't seem to work. It doesn't
+    * return the most recent voucher. It returns a random
+    * voucher.
+    * 
+    * When trying to use a QueryCommand, with a >= or any 
+    * ranged operator I get the error: "Query key condition not supported"
+    * 
+    *   
+    */
+    // console.log("voucherTable = ", voucherTable);
+    // const command = new ScanCommand({
+    //     TableName: voucherTable,
+    //     IndexName: "CreatedIndex",
+    //     ScanIndexForward: false,  // This sorts in descending order (newest first)
+    //     Limit: 1  // This gets only the first (newest) item 
+    // });
+    // 
+    // const command = new QueryCommand({
+    //     TableName: voucherTable,
+    //     IndexName: "CreatedIndex",
+    //     KeyConditionExpression: "CREATED >= :minValue",
+    //     ExpressionAttributeValues: {
+    //         ":minValue": 0  // This will match all CREATED values
+    //     },
+    //     ScanIndexForward: false,  // This sorts in descending order (newest first)
+    //     Limit: 1  // This gets only the first (newest) item
+    // });
+
+
+    // a DynamoDBDocumentClient QueryCommand to find the voucher with VOUCHER_ID of "0000_MOST_RECENT"
+    const command = new QueryCommand({
         TableName: voucherTable,
-        IndexName: "CreatedIndex",
-        ScanIndexForward: false,  // This sorts in descending order (newest first)
-        Limit: 1  // This gets only the first (newest) item    
+        KeyConditionExpression: "VOUCHER_ID = :voucherId",
+        ExpressionAttributeValues: {
+            ":voucherId": "0000_MOST_RECENT"
+        }
     });
+
 
     try {
         const response = await docClient.send(command);
         if (response.Items && response.Items.length > 0) {
             console.log("Most recent voucher retrieved successfully");
+            // console.log(response);
             console.log(response.Items[0]);
             return response.Items[0];
         } else {
@@ -239,6 +315,41 @@ const getMostRecentVoucher = async () => {
         throw error;
     }
 }
+
+// this function updates the CREATED value of the 0000_MOST_RECENT voucher in the VM_VOUCHER_CODES table...
+const updateMostRecentVoucher = async (newCreatedValue: number) => {
+
+    console.log("in dynamo.js updateMostRecentVoucher()...");
+
+    newCreatedValue = Number(newCreatedValue);
+    if (isNaN(newCreatedValue)) {
+        console.error("Invalid/NaN newCreatedValue:", newCreatedValue);
+        throw new Error("Not a valid number");
+    }
+
+    const command = new UpdateCommand({
+        TableName: voucherTable,
+        Key: {
+            VOUCHER_ID: "0000_MOST_RECENT",
+        },
+        UpdateExpression: "SET CREATED = :newCreatedValue",
+        ExpressionAttributeValues: {
+            ":newCreatedValue": newCreatedValue,
+        },
+        ReturnValues: "ALL_NEW", // Returns the updated item
+    });
+
+    try {
+        const response = await docClient.send(command);
+        console.log("0000_MOST_RECENT voucher CREATED updated successfully");
+        // console.log(response);
+        return response;
+    } catch (error) {
+        console.error("Error updating 0000_MOST_RECENT voucher:", error);
+        throw error;
+    }
+}
+
 
 
 
@@ -271,6 +382,110 @@ const updateVoucherLink = async (voucherId: string, newLink: string) => {
 
 
 
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+
+
+const getCustomerById = async (customerId: string) => {
+    const command = new GetCommand({
+        TableName: customerTable,
+        Key: {
+            CUSTOMER: customerId
+        }
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Item) {
+            console.log("Customer retrieved successfully");
+            console.log(response.Item);
+            return response.Item;
+        } else {
+            console.log("Customer not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving customer:", error);
+        throw error;
+    }
+}
+
+
+const getAllCustomers = async () => {
+    const command = new ScanCommand({
+        TableName: customerTable
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Items) {
+            console.log("Customers retrieved successfully. Count: ", response.Count);
+            // console.log(response.Items);
+            return response.Items;
+        } else {
+            console.log("No customers found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving customers:", error);
+        throw error;
+    }
+}
+
+
+
+
+// **********************
+//  CUSTOMER MANAGEMENT
+// **********************
+
+
+const getTransactionById = async (transactionId: string) => {
+    const command = new GetCommand({
+        TableName: transactionTable,
+        Key: {
+            TRANSACTION_ID: transactionId
+        }
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Item) {
+            console.log("Transaction retrieved successfully");
+            console.log(response.Item);
+            return response.Item;
+        } else {
+            console.log("Transaction not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving transaction:", error);
+        throw error;
+    }
+}
+
+const getAllTransactions = async () => {
+    const command = new ScanCommand({
+        TableName: transactionTable
+    });
+
+    try {
+        const response = await docClient.send(command);
+        if (response.Items) {
+            console.log("Transactions retrieved successfully. Count: ", response.Count);
+            console.log(response.Items);
+            return response.Items;
+        } else {
+            console.log("No transactions found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving transactions:", error);
+        throw error;
+    }
+}
+
 
 
 
@@ -288,5 +503,10 @@ module.exports = {
     getVouchersByTour,
     getVoucherById,
     getMostRecentVoucher,
-    updateVoucherLink
+    updateMostRecentVoucher,
+    updateVoucherLink,
+    getCustomerById,
+    getAllCustomers,
+    getTransactionById,
+    getAllTransactions,
 };

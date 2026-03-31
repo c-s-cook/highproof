@@ -83,7 +83,7 @@ export function getTourVoucher(tourNum) {
                             ":tourNum": tourNum,
                             ":available": true,
                         },
-                        Limit: 10
+                        Limit: 30
                     };
                     runQueryCommand = function () { return __awaiter(_this, void 0, void 0, function () {
                         var command, result, error_1;

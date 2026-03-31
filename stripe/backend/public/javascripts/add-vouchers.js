@@ -88,21 +88,39 @@ const checkAllConfirmed = () => {
 
 
 
-
-
-
 const handleNewTourTrue = (e) => {
    
     let i = e.target.dataset.tourIndex;
-    // console.log("Clicked, and found this array index: ",i)
-    // console.log("Tour Title in question is -> ", newTourTitles[i].TourTitle.TITLE)
+    let isPublished = false;
 
-    // console.log(document.querySelector(`.new-tour.checked, [data-tour-index="${i}"]`));
-    document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
-    e.target.disabled = true;
+    // confirm newTourTitle
+    let confirmNewTour = () => {
+        document.querySelector(`.new-tour.checked[data-tour-index="${i}"]`).style.visibility = "visible";
+        e.target.disabled = true;
+        
+        newTourTitles[i].confirmed = true;
+        newTourTitles[i].published = isPublished;
+        togglePopUp();
+        document.getElementById("new-tour-is-published").display = "none";
+        checkAllConfirmed();
+
+    }
+
+    // POP-UP: check if the new tour is "Published" on VoiceMap...
+
+
     
-    newTourTitles[i].confirmed = true,
-    checkAllConfirmed();
+    
+    if(i) document.getElementById("is-published-tour-title").innerText = newTourTitles[i].TourTitle.TITLE;
+    
+    document.querySelector("#new-tour-is-published button.yes").addEventListener("click", () => {
+        isPublished = true;
+        confirmNewTour();
+    });
+
+    document.querySelector("#new-tour-is-published button.no").addEventListener("click", confirmNewTour);
+
+    togglePopUp();
 }
 
 
@@ -277,8 +295,6 @@ const handleExistingTourFalse = (e) => {
 
     let sbmtButton = document.querySelector('#existing-tour-false button');
 
-    sbmtButton.innerText += "??";
-
     sbmtButton.addEventListener('click', ()=> {
 
         errMessage.innerHTML = "";
@@ -374,7 +390,8 @@ function displayTourTitleResults() {
         for (var nt = 0; nt < newTourTitles.length; nt++) {
             document.getElementById('new-tours').innerHTML += `
                 <div class="tour-title-list">
-                        <div class="title"><span class="new-tour checked ${nt}" data-tour-index="${nt}" style="visibility:hidden">&#9989</span> ${newTourTitles[nt].TourTitle.TITLE} </div>
+                        <div class="new-tour checked ${nt}" data-tour-index="${nt}" style="visibility:hidden">&#9989</div>
+                        <div class="title"> ${newTourTitles[nt].TourTitle.TITLE} </div>
                         <div class="count">Count: ${newTourTitles[nt].TourTitle.COUNT}</div>
                         <div class="buttons">
                             <button class="new-tour true ${nt}" data-tour-index="${nt}" onclick="handleNewTourTrue(event)">Yes, it's a new tour</button>
@@ -393,14 +410,18 @@ function displayTourTitleResults() {
         document.getElementById('existing-tours').innerHTML = '';
 
         for (var et = 0; et < existingTourTitles.length; et++) {
+            let isPublished = existingTourTitles[et].published ? ' <div><span id="is-published">(published)</span></div>' : ''
+
             document.getElementById('existing-tours').innerHTML += `
                     <div class="tour-title-list">
-                        <div class="title"><span class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</span> ${existingTourTitles[et].TourTitle.TITLE}</div>
+                        <div class="existing-tour checked ${et}"  data-tour-index="${et}" style="visibility:hidden">&#9989</div>
+                        <div class="title"> ${existingTourTitles[et].TourTitle.TITLE}</div>
+                         ${isPublished}
                         <div class="count">Count: ${existingTourTitles[et].TourTitle.COUNT}</div>
                         <div class="buttons">
-                            <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Yes, this is the right tour</button>
-                            <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">Yes, BUT this is a different tour</button>
-                            <button class="existing-tour false ${et}" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, this is a new tour</button>
+                            <button class="existing-tour true ${et}" data-tour-index="${et}" onclick="handleExistingTourTrue(event)">Correct</button>
+                            <button class="existing-tour change ${et}" data-tour-index="${et}" onclick="handleExistingTourChange(event)">This is a different tour</button>
+                            <button class="existing-tour false ${et}" data-tour-index="${et}" onclick="handleExistingTourFalse(event)">No, it's a new tour</button>
                         </div>
                     
                         
@@ -473,6 +494,7 @@ function displayVouchers(){
     console.log("in displayVouchers()")
 
     let results = document.getElementById('voucher-results')
+    results.style.display = "block";
     let table = document.getElementById('voucher-body')
     table.innerHTML = ''
 
@@ -642,7 +664,7 @@ function actionCreateTours(){
     // list out any newTourTitles
         newTourTitles.map((tour) => {
             
-            toursList.innerHTML += `<li>KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
+            toursList.innerHTML += `<li class="new-tour" data-tour="${tour.tourNumber}">KBT #${tour.tourNumber} - ${tour.TourTitle.TITLE}</li>`
         })
 
         // function for handling the button click to create tours in the database...
@@ -659,16 +681,20 @@ function actionCreateTours(){
                     body: JSON.stringify({
                         "TOUR_REGION": "KBT", // Using a fixed region for now...
                         "TOUR_NUM": newTourTitles[t].tourNumber,
-                        "TITLES": [newTourTitles[t].TourTitle.TITLE] // Assuming single title for new tours...
+                        "TITLES": [newTourTitles[t].TourTitle.TITLE], // Assuming single title for new tours...
+                        "VM_PUBLISHED": newTourTitles[t].published
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     console.log('Success:', data);
                     newTourTitles[t].createdInDB = true; // Mark this tour as created in the DB
+                    document.querySelector(`#tours-to-create>.tours-list>ul>li[data-tour="${newTourTitles[t].tourNumber}"]`).classList.add('success');
+                    createToursBtn.disabled = "true";
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                    document.querySelector(`#tours-to-create>.tours-list>ul>li[data-tour="${newTourTitles[t].tourNumber}"]`).classList.add('failure');
                 });
             }
         }
@@ -802,6 +828,26 @@ function  actionCreateVouchers(){
         console.log("Creating Vouchers in DB...")
         console.log(vouchers)
         
+        //  update the CREATED attribute of the 0000_MOST_RECENT voucher in DB...
+        let mostRecentCreated;
+        const updateMostRecentVoucher = async (newMostRecent) => {
+            try {
+                let response = await fetch(`api/update-latest-voucher/${newMostRecent}`);
+
+                if (!response.ok) throw new Error(`Error updating 0000_MOST_RECENT voucher to ${newMostRecent}: ${response}`);
+
+                const data = await response.json();
+                
+                return data.voucher.CREATED;
+                
+            } catch (error) {
+                console.error('Errps:', error);
+                return null;
+            }
+            
+
+        }
+
 
         for (let v = 0; v < vouchers.length; v++){
 
@@ -826,6 +872,12 @@ function  actionCreateVouchers(){
                 console.error('Error:', error);
                 vouchers[v].dbStatus = "upload-error"; // Mark this voucher as attempted, but errored
             });
+
+            // call method to update 0000_MOST_RECENT
+            if ((!mostRecentCreated && vouchers[v].dbStatus == "uploaded-successfully") || (mostRecentCreated < new Date(vouchers[v].CREATED).valueOf())) {
+                
+                mostRecentCreated = await updateMostRecentVoucher(new Date(vouchers[v].CREATED).valueOf());
+            }
             displayVouchers();
         }
         
@@ -872,7 +924,7 @@ function  actionCreateVouchers(){
 
     const checkForVoucherInDB = async () => {
 
-        // Get One (most recent) voucher from DB...
+        // Get the 0000_MOST_RECENT voucher from DB...
         // API returns an object with "success:" and "voucher:" elements
         let latestDbVoucher
         try {
@@ -891,6 +943,8 @@ function  actionCreateVouchers(){
         if(latestDbVoucher){
             // Test it's voucher code + creation Data against current CSV vouchers...
             for (let v = 0; v < vouchers.length; v++){
+                // console.log(new Date(vouchers[v].CREATED), ' > ', new Date(latestDbVoucher.CREATED), ' ? : ', (new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)));
+
                 if(new Date(vouchers[v].CREATED) > new Date(latestDbVoucher.CREATED)) {
                     // add nothing. element's abscense will be the key
                     console.log("this voucher was newer")
@@ -1064,7 +1118,8 @@ fileInput.addEventListener('change', async function (event) {
                 "allTitles": toursInDB[tourNumber].TITLES,
                 "tourNumber": toursInDB[tourNumber].TOUR_NUM,
                 "dbIndex": tourNumber,
-                "confirmed": false
+                "confirmed": false,
+                "published": toursInDB[tourNumber].VM_PUBLISHED
             });
         }
     }

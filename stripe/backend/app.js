@@ -4,10 +4,17 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+let dotenv = require('dotenv');
+dotenv.config();
+let isDev = process.env.IS_DEV == 'true' ? true : false;
+
 var dynamo = require('./dynamo')
 
-
 var indexRouter = require('./routes/index');
+var viewVouchersRouter = require('./routes/viewVouchers');
+var viewToursRouter = require('./routes/viewTours');
+var viewCustomersRouther = require('./routes/viewCustomers');
+var viewTransactionsRouter = require('./routes/viewTransactions');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -23,13 +30,35 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/', indexRouter);
-app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers' }));
-app.get('/vouchers', (req, res) => res.render('vouchers', { title: 'Vouchers' }));
-app.get('/customers', (req, res) => res.render('customers', { title: 'Customers' }));
-app.get('/tours', (req, res) => res.render('tours', { title: 'Tours' }));
-app.get('/transactions', (req, res) => res.render('transactions', { title: 'Transactions' }));
+app.use('/', (req, res, next) => {
+  // Attach isDev variable to res.locals so they're available in view
+  res.locals.isDev = isDev;
+  next();
+}, indexRouter);
 
+
+app.get('/vouchers/:voucherId?', (req, res, next)  => {
+  // Attach isDev variable to res.locals so they're available in view
+  res.locals.isDev = isDev;
+  next();
+}, viewVouchersRouter);
+
+app.get('/tours', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewToursRouter);
+
+app.get('/customers/:customerId?', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewCustomersRouther);
+
+app.get('/transactions/:transactionId?', (req, res, next) => {
+  res.locals.isDev = isDev;
+  next();
+}, viewTransactionsRouter);
+
+app.get('/add-vouchers', (req, res) => res.render('add-vouchers', { title: 'Add New Vouchers', isDev: isDev }));
 
 
 // **************
@@ -43,8 +72,8 @@ app.post('/api/add-voucher', async (req, res) => {
   let voucher = req.body;
   try {
     let response = await dynamo.createVoucher(voucher);
-    console.log(response);
-    res.json({ success: true, message: "Voucher added successfully!" });
+    // console.log(response);
+    res.json({ success: true, message: `Voucher ${voucher.VOUCHER_ID} added successfully!` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Failed to add voucher." });
@@ -68,7 +97,7 @@ app.get('/api/tour-vouchers/:TOUR_NUM', async (req, res) => {
 });
 
 
-// API to get the most recent voucher in the VM_VOUCHER_CODES table...
+// API to get the 0000_MOST_RECENT voucher in the VM_VOUCHER_CODES table...
 app.get('/api/get-latest-voucher', async (req, res) => {
   console.log("...in get-latest-voucher API...");
   try {
@@ -83,6 +112,21 @@ app.get('/api/get-latest-voucher', async (req, res) => {
   }
 });
 
+// API to update the CREATED value of the 0000_MOST_RECENT voucher...
+app.get('/api/update-latest-voucher/:CREATED', async (req, res) => {
+  console.log("...in update-latest-voucher API...");
+  const { CREATED } = req.params;
+  // console.log('CREATED = ', CREATED);
+  try {
+    let response = await dynamo.updateMostRecentVoucher(CREATED);
+    console.log('updateLatestVoucher response: ', response);
+    res.json({ success: true, voucher: response.Attributes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to update 0000_MOST_RECENT." });
+  }
+})
+
 
 
 
@@ -93,7 +137,7 @@ app.get('/api/vouchers/:VOUCHER_ID', async (req, res) => {
   try {
     // Call the function to get vouchers for the specified TOUR_NUM from the DynamoDB table
     let response = await dynamo.getVoucherById(VOUCHER_ID);
-    console.log("from app.js -", response);
+    // console.log("from app.js -", response);
     // Send a JSON response with the retrieved voucher
     res.json({ success: true, voucher: response });
   } catch (error) {
@@ -112,7 +156,7 @@ app.get('/api/vouchers/:VOUCHER_ID', async (req, res) => {
 //  API to get all items/tours in the TOURS table...
 app.get('/api/query-table', async (req, res) => {
   let response = await dynamo.getTours();
-  console.log("...in API...");
+  console.log("...in getTours() API...");
   console.log(response)
   res.json(response)
 });
@@ -121,11 +165,11 @@ app.get('/api/query-table', async (req, res) => {
 app.post('/api/create-tour', async (req, res) => {
   console.log("...in create-tour API...");
   console.log(req.body);
-  const { TOUR_REGION, TOUR_NUM, TITLES } = req.body;
-  console.log( TOUR_REGION, TOUR_NUM, TITLES )
+  const { TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED } = req.body;
+  console.log( TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED )
   try {
     // Call the function to create a new tour in the DynamoDB table
-    let response = await dynamo.createTour( TOUR_REGION, TOUR_NUM, TITLES );
+    let response = await dynamo.createTour( TOUR_REGION, TOUR_NUM, TITLES, VM_PUBLISHED );
     console.log(response);
     // Send a JSON response indicating success
     res.json({ success: true, message: "Tour created successfully!" });
