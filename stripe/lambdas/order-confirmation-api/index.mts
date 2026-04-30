@@ -4,7 +4,7 @@
 */
 
 
-import 'dotenv.config';
+// import 'dotenv.config';
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
@@ -21,18 +21,21 @@ interface Transaction {
 }
 
 
-let isDev = process.env.IS_DEV == 'true' ? true : false;
-
-// DYNAMODB TOUR TABLE NAMES
-// let toursTable = isDev ? "TOURS_DEV" : "TOURS";
-// let voucherTable = isDev ? "VM_VOUCHER_CODES_DEV" : "VM_VOUCHER_CODES"
-// let customerTable = isDev ? "CUSTOMERS_DEV" : "CUSTOMERS"
-// let transactionTable = isDev ? "TRANSACTIONS_DEV" : "TRANSACTIONS"
-
+// let isDev = process.env.IS_DEV == 'true' ? true : false;
 
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
+
+
+
+const allowedOrigins = [
+    'https://dev.highproofproductions.com',
+    'https://highproofproductions.com',
+    'https://www.highproofproductions.com',
+    'https://highprooftours.com',
+    'https://www.highprooftours.com',
+];
 
 
 export const handler = async (event: any) => {
@@ -46,9 +49,17 @@ export const handler = async (event: any) => {
 
     let transactionTable = "TRANSACTIONS";
 
-    if(origin.includes('dev.highproofproductions')) transactionTable = "TRANSACTIONS_DEV";
-    // else if (origin.includes('highproofproductions')) transactionTable = "TRANSACTIONS";
-    // else throw new Error(`Don't know this origin -> ${origin}`);
+    if (origin.includes('dev.highproofproductions')) transactionTable = "TRANSACTIONS_DEV";
+    else if (!allowedOrigins.includes(origin)) {
+        console.log(`Don't know this origin -> ${origin}`)
+        throw new Error(`Don't know this origin -> ${origin}`);
+    }
+
+    const CORSHeaders = {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    };
 
 
     try {
@@ -73,18 +84,21 @@ export const handler = async (event: any) => {
         if (!transactionResult.Item) {
             return {
                 statusCode: 404,
+                headers: CORSHeaders,
                 body: JSON.stringify({ error: "Transaction not found" }),
             };
         }
 
         return {
             statusCode: 200,
+            headers: CORSHeaders,
             body: JSON.stringify(transactionResult.Item),
         };
     } catch (error) {
         console.error("Error processing request:", error);
         return {
             statusCode: 500,
+            headers: CORSHeaders,
             body: JSON.stringify({ error: "Internal Server Error" }),
         };
     }
