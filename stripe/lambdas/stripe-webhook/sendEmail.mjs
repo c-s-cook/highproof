@@ -119,6 +119,7 @@ export var emailCustomerCodes = function (emailInfo) { return __awaiter(void 0, 
                 return [4 /*yield*/, transporter.sendMail({
                         from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
                         to: emailInfo.email,
+                        bcc: 'tickets@highprooftours.com',
                         subject: "Your drive is about to come alive! | ".concat(emailInfo.tourTitle),
                         text: 'Thanks for your purchase!', // plain text body
                         html: html,
@@ -150,6 +151,7 @@ export var emailCustomerPending = function (emailInfo) { return __awaiter(void 0
                 return [4 /*yield*/, transporter.sendMail({
                         from: "\"High Proof Tours\" <".concat(process.env.HPP_EMAIL, ">"),
                         to: emailInfo.email,
+                        bcc: 'tickets@highprooftours.com',
                         subject: "Your drive is about to come alive! | ".concat(emailInfo.tourTitle),
                         text: 'Thanks for your purchase!', // plain text body
                         html: html,

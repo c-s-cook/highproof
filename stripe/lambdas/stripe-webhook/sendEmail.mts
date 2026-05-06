@@ -89,6 +89,7 @@ export const emailCustomerCodes = async (emailInfo: EmailInfo) => {
         const info = await transporter.sendMail({
             from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
             to: emailInfo.email,
+            bcc: 'tickets@highprooftours.com',
             subject: `Your drive is about to come alive! | ${emailInfo.tourTitle}`, 
             text: 'Thanks for your purchase!', // plain text body
             html, // html body
@@ -116,6 +117,7 @@ export const emailCustomerPending = async (emailInfo: EmailInfo) => {
         const info = await transporter.sendMail({
             from: `"High Proof Tours" <${process.env.HPP_EMAIL}>`,
             to: emailInfo.email,
+            bcc: 'tickets@highprooftours.com',
             subject: `Your drive is about to come alive! | ${emailInfo.tourTitle}`, 
             text: 'Thanks for your purchase!', // plain text body
             html, // html body
