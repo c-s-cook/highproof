@@ -88,7 +88,39 @@ function readCSVFile(file) {
                 throw new Error("Unsupported file type");
             }
             var lines = textResult.split(/\r\n|\n/);
-            var startAt = lines[0].split(",")[0] == "Voucher Name" ? 1 : 0;
+            var startAt = 0;
+            var columnTitles = lines[0].split(",") || null;
+            // var startAt = lines[0].split(",")[0] == "Voucher Name" ? 1 : 0;
+            // VoiceMap Voucher CSV format, pre-2026: 
+            //      0 Voucher Name,
+            //      1 Tour,
+            //      2 Quantity,
+            //      3 Redeemed,
+            //      4 State,
+            //      5 Links,
+            //      6 Created At
+            // VoiceMap Voucher CSV format, c2026:
+            //      0 Voucher Name,
+            //      1 Tour,
+            //      2 Limit,
+            //      3 Downloaded,
+            //      4 Links,
+            //      5 Created At 
+            if (columnTitles && columnTitles[0] == "Voucher Name") {
+                // confirm that we're processing the new CSV format
+                if (columnTitles[1] == 'Tour' &&
+                    columnTitles[2] == 'Limit' &&
+                    columnTitles[3] == 'Downloaded' &&
+                    columnTitles[4] == 'Links' &&
+                    columnTitles[5] == 'Created At') {
+                    startAt = 1;
+                }
+                else {
+                    startAt = lines.length;
+                    window.alert('Looks like we have a CSV formatting issue?');
+                    throw new Error('Looks like we have a CSV formatting issue...');
+                }
+            }
             for (var line = startAt; line < lines.length - 1; line++) {
                 var columns = lines[line].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // split each line into an array of columns
                 if (columns[1] == "")
@@ -97,12 +129,12 @@ function readCSVFile(file) {
                     "VOUCHER_ID": columns[0],
                     "TourTitle": columns[1].replace(/^"|"$/g, ''),
                     "Quantity": columns[2],
-                    "REDEEMED": columns[3] == "0" ? false : true,
-                    "State": columns[4],
+                    "REDEEMED": (Number(columns[3]) - Number(columns[2])) == 0 ? false : true,
+                    "State": 'null',
                     "TOUR_NUM": null,
-                    "LINK": columns[5],
-                    "AVAILABLE": columns[3] == "0" ? true : false,
-                    "CREATED": columns[6],
+                    "LINK": columns[4],
+                    "AVAILABLE": (Number(columns[3]) - Number(columns[2])) > 0 ? true : false,
+                    "CREATED": columns[5],
                     "PURCHASED": null, //Date()
                     "TRANSACTION_ID": null //Str / Foreign Key
                 };
